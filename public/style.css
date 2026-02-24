@@ -1,0 +1,235 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  min-height: 100vh;
+  color: #fff;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.room-info {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+#playerName {
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  width: 200px;
+}
+
+button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+button:hover {
+  transform: scale(1.05);
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+.btn-primary { background: #4ade80; color: #000; }
+.btn-secondary { background: #60a5fa; color: #000; }
+.btn-danger { background: #f87171; color: #000; }
+.btn-warning { background: #fbbf24; color: #000; }
+
+main {
+  display: grid;
+  gap: 20px;
+}
+
+section {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+h2 {
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+  color: #a5b4fc;
+}
+
+/* Deck Section */
+.deck-section {
+  text-align: center;
+}
+
+.deck-info {
+  margin-bottom: 15px;
+}
+
+.deck-cards {
+  display: flex;
+  justify-content: center;
+  gap: -30px;
+  margin-bottom: 20px;
+}
+
+.card {
+  width: 80px;
+  height: 120px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.card.back {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+  border: 2px solid #fff;
+}
+
+.card.back::before {
+  content: '♦';
+  color: rgba(255,255,255,0.3);
+  font-size: 2rem;
+}
+
+.card.red { color: #ef4444; }
+.card.black { color: #000; }
+
+.deck-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* Table Section */
+.table-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 100px;
+  justify-content: center;
+  align-items: center;
+}
+
+.table-cards .card {
+  width: 70px;
+  height: 100px;
+  background: #fff;
+}
+
+.empty-msg {
+  color: rgba(255,255,255,0.5);
+  font-style: italic;
+}
+
+/* Players Section */
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+}
+
+.player-card {
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.player-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.player-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.remove-btn {
+  background: #f87171;
+  color: #000;
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.player-cards {
+  display: flex;
+  gap: -20px;
+  flex-wrap: wrap;
+}
+
+.player-cards .card {
+  width: 50px;
+  height: 75px;
+  font-size: 1.2rem;
+}
+
+.deal-btn {
+  margin-top: 10px;
+  width: 100%;
+  background: #4ade80;
+  color: #000;
+  padding: 8px;
+}
+
+/* Video Section */
+.video-section {
+  margin-top: 20px;
+}
+
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.video-placeholder {
+  background: rgba(255,255,255,0.1);
+  border-radius: 12px;
+  height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+video {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 12px;
+  background: #000;
+}
+
+.my-video {
+  border: 3px solid #4ade80;
+}
