@@ -20,7 +20,7 @@ A real-time multiplayer card game built with Node.js, Express, and Socket.io.
 ## Running Locally
 
 ```bash
-cd poker-room
+cd cny-card-game
 npm install
 node server.js
 ```
