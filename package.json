@@ -1,5 +1,5 @@
 {
-  "name": "poker-room",
+  "name": "cny-card-game",
   "version": "1.0.0",
   "description": "Online card game with video",
   "main": "server.js",
