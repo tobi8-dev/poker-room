@@ -292,11 +292,13 @@ io.on('connection', (socket) => {
     });
 
     // -------------------------------------------------------------------------
-    // BALANCE MANAGEMENT (Admin Only)
+    // BALANCE MANAGEMENT (Player can update own, Admin can update anyone)
     // -------------------------------------------------------------------------
     socket.on('updateBalance', ({ playerId, amount }) => {
-        if (!isAdmin(socket.id)) {
-            socket.emit('error', 'Only admin can update balance!');
+        const isOwnBalance = socket.id === playerId;
+        
+        if (!isAdmin(socket.id) && !isOwnBalance) {
+            socket.emit('error', 'You can only update your own balance!');
             return;
         }
         

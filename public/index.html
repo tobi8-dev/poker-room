@@ -475,12 +475,13 @@
             '<div class="balance">💰 ' + balance + '</div>' +
             '<div class="cards">' + cardsHtml + '</div>' +
             (isAdmin ? '<button class="deal-to-btn" onclick="dealToPlayer(\'' + player.id + '\')">Deal 1</button>' : '') +
-            (isAdmin ? '<button class="bal-btn" onclick="updateBalance(\'' + player.id + '\',1)">+1</button>' : '') +
-            (isAdmin ? '<button class="bal-btn" onclick="updateBalance(\'' + player.id + '\',5)">+5</button>' : '') +
-            (isAdmin ? '<button class="bal-btn" onclick="updateBalance(\'' + player.id + '\',10)">+10</button>' : '') +
-            (isAdmin ? '<button class="bal-btn minus" onclick="updateBalance(\'' + player.id + '\',-1)">-1</button>' : '') +
-            (isAdmin ? '<button class="bal-btn minus" onclick="updateBalance(\'' + player.id + '\',-5)">-5</button>' : '') +
-            (isAdmin ? '<button class="bal-btn minus" onclick="updateBalance(\'' + player.id + '\',-10)">-10</button>' : '') +
+            // Balance buttons - player can update own, admin can update anyone
+            ((isAdmin || isMe) ? '<button class="bal-btn" onclick="updateBalance(\'' + player.id + '\',1)">+1</button>' : '') +
+            ((isAdmin || isMe) ? '<button class="bal-btn" onclick="updateBalance(\'' + player.id + '\',5)">+5</button>' : '') +
+            ((isAdmin || isMe) ? '<button class="bal-btn" onclick="updateBalance(\'' + player.id + '\',10)">+10</button>' : '') +
+            ((isAdmin || isMe) ? '<button class="bal-btn minus" onclick="updateBalance(\'' + player.id + '\',-1)">-1</button>' : '') +
+            ((isAdmin || isMe) ? '<button class="bal-btn minus" onclick="updateBalance(\'' + player.id + '\',-5)">-5</button>' : '') +
+            ((isAdmin || isMe) ? '<button class="bal-btn minus" onclick="updateBalance(\'' + player.id + '\',-10)">-10</button>' : '') +
             (isAdmin ? '<button class="remove-btn" onclick="removePlayer(\'' + player.id + '\')">Remove</button>' : '') +
             '</div>';
         }).join('');
