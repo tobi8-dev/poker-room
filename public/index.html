@@ -32,6 +32,8 @@
     .btn-secondary { background: #a855f7; color: white; }
     .btn-danger { background: #ef4444; color: white; }
     .btn-warning { background: #f59e0b; color: #000; }
+    .btn-success { background: #22c55e; color: white; }
+    .btn-debug { background: #6b7280; color: white; font-size: 0.75rem; padding: 6px 10px; }
 
     .table {
       background: #8B0000; border-color: #D4AF37;
@@ -144,6 +146,66 @@
     .remove-btn { margin-top: 5px; font-size: 0.7rem; padding: 4px 8px; background: #ef4444; color: white; }
     .bal-btn { margin: 2px; font-size: 0.65rem; padding: 3px 6px; background: #22c55e; color: white; border: none; border-radius: 3px; }
     .bal-btn.minus { background: #ef4444; }
+    
+    /* Debug Panel */
+    .debug-panel {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1f2937;
+      border: 3px solid #f59e0b;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 80vw;
+      max-height: 80vh;
+      overflow: auto;
+      z-index: 1000;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    }
+    .debug-panel.visible { display: block; }
+    .debug-panel h3 { color: #f59e0b; margin-bottom: 15px; }
+    .debug-panel .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .debug-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+      gap: 5px;
+    }
+    .debug-card {
+      background: white;
+      color: #1f2937;
+      padding: 5px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      text-align: center;
+    }
+    .debug-card.red { color: #dc2626; }
+    .debug-card.black { color: #1f2937; }
+    .debug-card .idx { font-size: 0.5rem; color: #6b7280; }
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 999;
+    }
+    .overlay.visible { display: block; }
   </style>
 </head>
 <body>
@@ -173,6 +235,7 @@
       <div class="table-controls">
         <button id="shuffleBtn" class="btn-warning">🔀 Shuffle</button>
         <button id="resetBtn" class="btn-danger">🔄 Reset</button>
+        <button id="debugDeckBtn" class="btn-debug" style="display:none;">🔍 Debug Deck</button>
       </div>
 
       <div class="players-around-table" id="playersAroundTable"></div>
@@ -191,55 +254,127 @@
     </div>
   </div>
 
+  <!-- Debug Overlay -->
+  <div class="overlay" id="debugOverlay"></div>
+  
+  <!-- Debug Panel -->
+  <div class="debug-panel" id="debugPanel">
+    <button class="close-btn" onclick="closeDebug()">×</button>
+    <h3>🔍 Deck Sequence (Top to Bottom)</h3>
+    <div class="debug-grid" id="debugGrid"></div>
+  </div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    // =======================================================================
+    // SOCKET CONNECTION
+    // =======================================================================
     const socket = io();
 
-    document.addEventListener('DOMContentLoaded', () => {
-      const playerNameInput = document.getElementById('playerName');
-      const joinBtn = document.getElementById('joinBtn');
-      const shuffleBtn = document.getElementById('shuffleBtn');
-      const resetBtn = document.getElementById('resetBtn');
-      const dealToCenterBtn = document.getElementById('dealToCenterBtn');
-      const clearCenterBtn = document.getElementById('clearCenterBtn');
+    // =======================================================================
+    // DOM ELEMENTS
+    // =======================================================================
+    const elements = {
+      playerName: document.getElementById('playerName'),
+      joinBtn: document.getElementById('joinBtn'),
+      adminPassword: document.getElementById('adminPassword'),
+      adminBtn: document.getElementById('adminBtn'),
+      shuffleBtn: document.getElementById('shuffleBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      dealToAllBtn: document.getElementById('dealToAllBtn'),
+      dealToCenterBtn: document.getElementById('dealToCenterBtn'),
+      clearCenterBtn: document.getElementById('clearCenterBtn'),
+      debugDeckBtn: document.getElementById('debugDeckBtn'),
+      deckCount: document.getElementById('deckCount'),
+      playersAroundTable: document.getElementById('playersAroundTable'),
+      tableCenter: document.getElementById('tableCenter'),
+      playersList: document.getElementById('playersList'),
+      debugPanel: document.getElementById('debugPanel'),
+      debugOverlay: document.getElementById('debugOverlay'),
+      debugGrid: document.getElementById('debugGrid')
+    };
 
-      playerNameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') joinBtn.click(); });
-      joinBtn.addEventListener('click', () => {
-        const name = playerNameInput.value.trim();
+    // =======================================================================
+    // EVENT LISTENERS
+    // =======================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // Join game
+      elements.playerName.addEventListener('keypress', (e) => { 
+        if (e.key === 'Enter') elements.joinBtn.click(); 
+      });
+      elements.joinBtn.addEventListener('click', () => {
+        const name = elements.playerName.value.trim();
         if (!name) { alert('Please enter your name'); return; }
         socket.emit('join', name);
-        playerNameInput.disabled = true;
-        joinBtn.disabled = true;
-        joinBtn.textContent = 'Joined!';
+        elements.playerName.disabled = true;
+        elements.joinBtn.disabled = true;
+        elements.joinBtn.textContent = 'Joined!';
       });
 
-      adminPasswordInput = document.getElementById('adminPassword');
-      adminPasswordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('adminBtn').click(); });
-      document.getElementById('adminBtn').addEventListener('click', () => {
-        const password = document.getElementById('adminPassword').value;
+      // Admin login
+      elements.adminPassword.addEventListener('keypress', (e) => { 
+        if (e.key === 'Enter') elements.adminBtn.click(); 
+      });
+      elements.adminBtn.addEventListener('click', () => {
+        const password = elements.adminPassword.value;
         if (!password) { alert('Enter password'); return; }
         socket.emit('setAdminPassword', password);
       });
 
-      shuffleBtn.addEventListener('click', () => { socket.emit('shuffle'); });
-      resetBtn.addEventListener('click', () => { resetGame(); });
-      dealToCenterBtn.addEventListener('click', () => { socket.emit('dealToCenter'); });
-      document.getElementById('dealToAllBtn').addEventListener('click', () => { socket.emit('dealToAll'); });
-      if (socket.id === 'REPLACEME') { document.getElementById('dealToAllBtn').style.display = 'none'; document.getElementById('dealToCenterBtn').style.display = 'none'; document.getElementById('clearCenterBtn').style.display = 'none'; document.getElementById('shuffleBtn').style.display = 'none'; document.getElementById('resetBtn').style.display = 'none'; }
-      clearCenterBtn.addEventListener('click', () => { socket.emit('clearCenter'); });
-
-      socket.on('updateGame', (gameState) => { 
-        renderGame(gameState);
-        // Hide controls if not admin
-        const isAdmin = gameState.adminId && socket.id === gameState.adminId;
-        document.getElementById('dealToAllBtn').style.display = isAdmin ? 'inline-block' : 'none';
-        document.getElementById('dealToCenterBtn').style.display = isAdmin ? 'inline-block' : 'none';
-        document.getElementById('clearCenterBtn').style.display = isAdmin ? 'inline-block' : 'none';
-        document.getElementById('shuffleBtn').style.display = isAdmin ? 'inline-block' : 'none';
-        document.getElementById('resetBtn').style.display = isAdmin ? 'inline-block' : 'none';
+      // Admin controls
+      elements.shuffleBtn.addEventListener('click', () => { socket.emit('shuffle'); });
+      elements.resetBtn.addEventListener('click', () => { resetGame(); });
+      elements.dealToCenterBtn.addEventListener('click', () => { socket.emit('dealToCenter'); });
+      elements.dealToAllBtn.addEventListener('click', () => { socket.emit('dealToAll'); });
+      elements.clearCenterBtn.addEventListener('click', () => { socket.emit('clearCenter'); });
+      
+      // DEBUG: Show deck sequence
+      elements.debugDeckBtn.addEventListener('click', () => { 
+        socket.emit('debugShowDeck'); 
       });
-      socket.on('error', (msg) => { alert(msg); });
+
+      // Close debug panel
+      elements.debugOverlay.addEventListener('click', closeDebug);
     });
+
+    // =======================================================================
+    // SOCKET EVENT HANDLERS
+    // =======================================================================
+    
+    // Update game state
+    socket.on('updateGame', (gameState) => { 
+      renderGame(gameState);
+      
+      // Show/hide admin controls based on admin status
+      const isAdmin = gameState.adminId && socket.id === gameState.adminId;
+      const controls = [
+        elements.dealToAllBtn,
+        elements.dealToCenterBtn,
+        elements.clearCenterBtn,
+        elements.shuffleBtn,
+        elements.resetBtn,
+        elements.debugDeckBtn
+      ];
+      
+      controls.forEach(ctrl => {
+        ctrl.style.display = isAdmin ? 'inline-block' : 'none';
+      });
+    });
+
+    // Error messages
+    socket.on('error', (msg) => { 
+      alert(msg); 
+    });
+
+    // DEBUG: Receive deck sequence
+    socket.on('debugDeck', (deck) => {
+      showDebugDeck(deck);
+    });
+
+    // =======================================================================
+    // RENDER FUNCTIONS
+    // =======================================================================
 
     function renderCard(card) {
       if (!card) return '<div class="card back"></div>';
@@ -248,38 +383,43 @@
 
     function renderGame(gameState) {
       const isAdmin = gameState.adminId && socket.id === gameState.adminId;
-      document.getElementById('deckCount').textContent = gameState.deck.length;
+      elements.deckCount.textContent = gameState.deck.length;
 
-      const aroundTable = document.getElementById('playersAroundTable');
+      // Render players around table
       if (gameState.players.length === 0) {
-        aroundTable.innerHTML = '<p style="color:#86efac;font-size:0.9rem">Join to play!</p>';
+        elements.playersAroundTable.innerHTML = '<p style="color:#86efac;font-size:0.9rem">Join to play!</p>';
       } else {
-        aroundTable.innerHTML = gameState.players.map(player => {
+        elements.playersAroundTable.innerHTML = gameState.players.map(player => {
           return '<div class="table-player"><div class="name">' + player.name + '</div></div>';
         }).join('');
       }
 
-      const center = document.getElementById('tableCenter');
+      // Render center cards
       if (gameState.centerCards.length === 0) {
-        center.innerHTML = '<p style="color:#86efac;font-size:0.8rem">Cards dealt to table</p>';
+        elements.tableCenter.innerHTML = '<p style="color:#86efac;font-size:0.8rem">Cards dealt to table</p>';
       } else {
-        center.innerHTML = gameState.centerCards.map((card, idx) => 
+        elements.tableCenter.innerHTML = gameState.centerCards.map((card, idx) => 
           '<div class="card ' + card.color + '" onclick="returnToDeck(' + idx + ')">' + card.value + card.suit + '</div>'
         ).join('');
       }
 
-      const listContainer = document.getElementById('playersList');
+      // Render player list
       if (gameState.players.length === 0) {
-        listContainer.innerHTML = '<p style="color:#9ca3af">No players yet. Join below!</p>';
+        elements.playersList.innerHTML = '<p style="color:#9ca3af">No players yet. Join below!</p>';
       } else {
-        listContainer.innerHTML = gameState.players.map(player => {
+        elements.playersList.innerHTML = gameState.players.map(player => {
+          const isMe = player.id === socket.id;
           const balance = player.balance || 0;
           const cardsHtml = player.cards.length > 0
             ? player.cards.map(c => renderCard(c)).join('')
             : '<span style="color:#6b7280;font-size:0.75rem">No cards</span>';
-          const isMe = player.isMe;
+            
           return '<div class="player-card ' + (isMe ? 'is-me' : '') + '">' +
-            '<div class="name">' + player.name + (player.id === gameState.adminId ? ' 👑' : '') + (isMe ? ' 👈' : '') + '</div><div class="balance">💰 ' + balance + '</div>' +
+            '<div class="name">' + player.name + 
+            (player.id === gameState.adminId ? ' 👑' : '') + 
+            (isMe ? ' 👈' : '') + 
+            '</div>' +
+            '<div class="balance">💰 ' + balance + '</div>' +
             '<div class="cards">' + cardsHtml + '</div>' +
             (isAdmin ? '<button class="deal-to-btn" onclick="dealToPlayer(\'' + player.id + '\')">Deal 1</button>' : '') +
             (isAdmin ? '<button class="bal-btn" onclick="updateBalance(\'' + player.id + '\',1)">+1</button>' : '') +
@@ -294,10 +434,39 @@
       }
     }
 
+    // =======================================================================
+    // DEBUG FUNCTIONS
+    // =======================================================================
+    
+    function showDebugDeck(deck) {
+      elements.debugGrid.innerHTML = deck.map(card => 
+        '<div class="debug-card ' + card.color + '">' +
+        '<div class="idx">#' + card.index + '</div>' +
+        card.value + card.suit +
+        '</div>'
+      ).join('');
+      
+      elements.debugPanel.classList.add('visible');
+      elements.debugOverlay.classList.add('visible');
+    }
+
+    function closeDebug() {
+      elements.debugPanel.classList.remove('visible');
+      elements.debugOverlay.classList.remove('visible');
+    }
+
+    // =======================================================================
+    // PLAYER ACTIONS
+    // =======================================================================
+    
     function dealToPlayer(playerId) { socket.emit('dealToPlayer', playerId); }
     function removePlayer(playerId) { socket.emit('removePlayer', playerId); }
     function updateBalance(playerId, amount) { socket.emit('updateBalance', { playerId, amount }); }
-    function resetGame() { if(confirm('Reset game? All players will be removed.')){ socket.emit('resetGame'); } }
+    function resetGame() { 
+      if(confirm('Reset game? All players will be removed.')){ 
+        socket.emit('resetGame'); 
+      } 
+    }
     function returnToDeck(cardIndex) { socket.emit('returnCardToDeck', cardIndex); }
   </script>
 </body>
