@@ -97,6 +97,8 @@ h2 {
 }
 
 .card {
+  background: linear-gradient(135deg, #8B0000 0%, #FFD700 100%);
+  border: 2px solid #D4AF37;
   width: 80px;
   height: 120px;
   border-radius: 8px;
@@ -140,6 +142,8 @@ h2 {
 }
 
 .table-cards .card {
+  background: linear-gradient(135deg, #8B0000 0%, #FFD700 100%);
+  border: 2px solid #D4AF37;
   width: 70px;
   height: 100px;
   background: #fff;
@@ -189,6 +193,8 @@ h2 {
 }
 
 .player-cards .card {
+  background: linear-gradient(135deg, #8B0000 0%, #FFD700 100%);
+  border: 2px solid #D4AF37;
   width: 50px;
   height: 75px;
   font-size: 1.2rem;
