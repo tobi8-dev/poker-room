@@ -1,4 +1,4 @@
-# 🃏 Poker Room - Multiplayer Card Game
+# 🃏 🐲 CNY Card Game - Multiplayer Card Game
 
 A real-time multiplayer card game built with Node.js, Express, and Socket.io.
 
