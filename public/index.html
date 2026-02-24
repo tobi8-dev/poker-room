@@ -346,6 +346,14 @@
     socket.on('updateGame', (gameState) => { 
       renderGame(gameState);
       
+      // Check if current user is in players list - if not, reset join button
+      const myPlayer = gameState.players.find(p => p.id === socket.id);
+      if (!myPlayer) {
+        elements.playerName.disabled = false;
+        elements.joinBtn.disabled = false;
+        elements.joinBtn.textContent = 'Join Table';
+      }
+      
       // Show/hide admin controls based on admin status
       const isAdmin = gameState.adminId && socket.id === gameState.adminId;
       const controls = [
