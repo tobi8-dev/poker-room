@@ -4,224 +4,129 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🐲 CNY Card Game 🧧</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
   <style>
+    :root { --gold: #FFD700; --gold-dark: #B8860B; --red: #8B0000; --red-light: #DC2626; }
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #8B0000 0%, #D4AF37 50%, #8B0000 100%);
-      min-height: 100vh;
-      color: white;
-      padding: 15px;
-    }
-    .container { max-width: 900px; margin: 0 auto; }
+    body { font-family: 'Poppins', 'Noto Sans SC', sans-serif; background: linear-gradient(135deg, #1a0a0a 0%, #4a0000 25%, #8B0000 50%, #4a0000 75%, #1a0a0a 100%); min-height: 100vh; color: white; padding: 15px; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 20% 80%, rgba(255,215,0,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 20%, rgba(255,215,0,0.1) 0%, transparent 50%); pointer-events: none; z-index: -1; }
+    .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; overflow: hidden; }
+    .particle { position: absolute; width: 8px; height: 8px; background: var(--gold); border-radius: 50%; opacity: 0.4; animation: float 12s infinite; }
+    @keyframes float { 0%, 100% { transform: translateY(100vh) rotate(0deg); opacity: 0; } 10%, 90% { opacity: 0.4; } 100% { transform: translateY(-100px) rotate(720deg); opacity: 0; } }
+    .container { max-width: 900px; margin: 0 auto; animation: fadeIn 0.6s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
     header { text-align: center; margin-bottom: 20px; }
-    h1 { font-size: 1.8rem; margin-bottom: 15px; }
-    .join-section { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-    input { padding: 12px 16px; border-radius: 8px; border: none; font-size: 1rem; width: 160px; }
-    button {
-      padding: 12px 20px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-size: 0.95rem;
-      font-weight: 500;
-      transition: transform 0.1s;
-    }
-    button:active { transform: scale(0.96); }
-    .btn-primary { background: #00d9ff; color: #000; }
-    .btn-secondary { background: #a855f7; color: white; }
-    .btn-danger { background: #ef4444; color: white; }
-    .btn-warning { background: #f59e0b; color: #000; }
-    .btn-success { background: #22c55e; color: white; }
-    .btn-debug { background: #6b7280; color: white; font-size: 0.75rem; padding: 6px 10px; }
-
-    .table {
-      background: #8B0000; border-color: #D4AF37;
-      border-radius: 20px;
-      padding: 30px;
-      margin: 20px 0;
-      border: 12px solid #854d0e;
-      box-shadow: inset 0 0 40px rgba(0,0,0,0.4), 0 15px 40px rgba(0,0,0,0.5);
-      min-height: 350px;
-      position: relative;
-    }
-    .deck-area {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
-    .deck-count { font-size: 0.85rem; color: #86efac; }
-    .deck-cards { display: flex; }
-    .deck-card {
-      width: 50px;
-      height: 70px;
-      background: linear-gradient(135deg, #dc2626 0%, #fbbf24 50%, #dc2626 100%);
-      border-radius: 6px;
-      border: 2px solid white;
-      margin-left: -20px;
-    }
+    h1 { font-size: 2.5rem; margin-bottom: 8px; background: linear-gradient(45deg, #FFD700, #FFF8DC, #FFD700, #FFA500); background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: shimmer 3s ease infinite; }
+    @keyframes shimmer { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+    .subtitle { font-size: 1.1rem; color: var(--gold); font-weight: 400; letter-spacing: 1px; }
+    .lantern { position: fixed; font-size: 3rem; opacity: 0.7; animation: swing 4s ease-in-out infinite; z-index: -1; }
+    .lantern:nth-child(1) { top: 5px; left: 15px; animation-delay: 0s; }
+    .lantern:nth-child(2) { top: 5px; right: 15px; animation-delay: 2s; }
+    @keyframes swing { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+    .join-section { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; animation: slideUp 0.6s ease-out 0.2s both; }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+    input { padding: 14px 20px; border-radius: 30px; border: 2px solid var(--gold); font-size: 1rem; width: 170px; background: rgba(0,0,0,0.6); color: white; transition: all 0.3s; }
+    input:focus { outline: none; border-color: #fff; box-shadow: 0 0 25px rgba(255,215,0,0.5); transform: scale(1.02); }
+    input::placeholder { color: rgba(255,255,255,0.5); }
+    button { padding: 14px 28px; border-radius: 30px; border: none; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s; position: relative; }
+    button:hover { transform: translateY(-3px); }
+    button:active { transform: scale(0.97); }
+    .btn-primary { background: linear-gradient(135deg, #00d9ff, #0099cc); color: #000; box-shadow: 0 6px 20px rgba(0,217,255,0.4); }
+    .btn-secondary { background: linear-gradient(135deg, #a855f7, #7c3aed); color: white; box-shadow: 0 6px 20px rgba(168,85,247,0.4); }
+    .btn-danger { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; box-shadow: 0 6px 20px rgba(239,68,68,0.4); }
+    .btn-warning { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; box-shadow: 0 6px 20px rgba(255,215,0,0.4); }
+    .btn-success { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; box-shadow: 0 6px 20px rgba(34,197,94,0.4); }
+    .btn-debug { background: linear-gradient(135deg, #6b7280, #4b5563); color: white; font-size: 0.75rem; padding: 8px 14px; }
+    .table { background: radial-gradient(ellipse at center, #8B0000 0%, #5c0000 60%, #2d0000 100%); border-radius: 35px; padding: 35px; margin: 25px 0; border: 10px solid var(--gold); box-shadow: 0 0 80px rgba(255,215,0,0.4), inset 0 0 120px rgba(0,0,0,0.6), 0 25px 80px rgba(0,0,0,0.6); min-height: 420px; position: relative; overflow: hidden; }
+    .table::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 6px); pointer-events: none; }
+    .table::after { content: '🧧'; position: absolute; top: 12px; left: 50%; transform: translateX(-50%); font-size: 2.2rem; opacity: 0.6; }
+    .deck-area { position: absolute; top: 25px; left: 25px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .deck-count { font-size: 1rem; color: var(--gold); text-shadow: 0 0 15px rgba(255,215,0,0.6); font-weight: 600; transition: all 0.3s; }
+    .deck-cards { display: flex; perspective: 1000px; }
+    .deck-card { width: 58px; height: 82px; background: linear-gradient(145deg, #dc2626, #fbbf24 50%, #dc2626); border-radius: 10px; border: 3px solid white; margin-left: -35px; box-shadow: -3px 3px 15px rgba(0,0,0,0.6); transition: all 0.4s; }
     .deck-card:first-child { margin-left: 0; }
-    .table-controls {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .table-controls button { font-size: 0.8rem; padding: 8px 12px; }
-    .players-around-table {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px;
-      padding: 20px;
-    }
-    .table-player { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-    .table-player .name {
-      font-size: 0.8rem;
-      background: rgba(0,0,0,0.6);
-      padding: 4px 10px;
-      border-radius: 12px;
-      white-space: nowrap;
-    }
-    .table-player .cards { display: flex; gap: 4px; }
-    .card {
-      width: 45px;
-      height: 64px;
-      background: white;
-      border-radius: 5px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 0.9rem;
-      box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
-    }
-    .card.red { color: #dc2626; }
-    .card.black { color: #1f2937; }
-    .card.back {
-      background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #7c3aed 100%);
-      border: 2px solid #e9d5ff;
-    }
-    .table-center {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      justify-content: center;
-      max-width: 200px;
-    }
-    .controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
-    .controls button { font-size: 0.9rem; }
-    .players-section {
-      background: rgba(255,255,255,0.1);
-      border-radius: 12px;
-      padding: 15px;
-      margin-top: 15px;
-    }
-    .players-section h2 { font-size: 1rem; margin-bottom: 12px; text-align: center; color: #e9d5ff; }
-    .players-list { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
-    .player-card {
-      background: rgba(0,0,0,0.4);
-      padding: 12px;
-      border-radius: 10px;
-      text-align: center;
-      min-width: 120px;
-      border: 2px solid transparent;
-    }
-    .player-card.is-me { border-color: #00d9ff; }
-    .player-card .name { font-size: 0.9rem; margin-bottom: 8px; }
-    .player-card .cards { display: flex; gap: 4px; justify-content: center; min-height: 64px; align-items: center; }
-    .player-card .card { width: 35px; height: 50px; font-size: 0.75rem; }
-    .deal-to-btn { margin-top: 8px; font-size: 0.75rem; padding: 6px 12px; background: #22c55e; color: white; }
-    .remove-btn { margin-top: 5px; font-size: 0.7rem; padding: 4px 8px; background: #ef4444; color: white; }
-    .bal-btn { margin: 2px; font-size: 0.65rem; padding: 3px 6px; background: #22c55e; color: white; border: none; border-radius: 3px; }
+    .deck-card:nth-child(2) { transform: translateY(-8px) rotate(-3deg); }
+    .deck-card:nth-child(3) { transform: translateY(-16px) rotate(3deg); }
+    .deck-card:hover { transform: translateY(-25px) scale(1.15) rotate(0deg) !important; z-index: 20; }
+    .table-controls { position: absolute; top: 25px; right: 25px; display: flex; flex-direction: column; gap: 12px; }
+    .table-controls button { font-size: 0.9rem; padding: 12px 18px; }
+    .players-around-table { display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; padding: 25px; position: relative; z-index: 1; }
+    .table-player { display: flex; flex-direction: column; align-items: center; gap: 10px; animation: popIn 0.5s ease-out both; }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.6) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+    .table-player .name { font-size: 1rem; background: linear-gradient(135deg, rgba(0,0,0,0.85), rgba(40,0,0,0.85)); padding: 10px 20px; border-radius: 25px; border: 2px solid var(--gold); white-space: nowrap; text-shadow: 0 0 12px rgba(255,215,0,0.6); }
+    .table-player .cards { display: flex; gap: 6px; }
+    .card { width: 55px; height: 78px; background: linear-gradient(150deg, #fff 0%, #f5f5f5 100%); border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 900; font-size: 1.1rem; box-shadow: 4px 4px 15px rgba(0,0,0,0.5); transition: all 0.4s; cursor: pointer; position: relative; }
+    .card:hover { transform: translateY(-20px) scale(1.15) rotate(0deg) !important; z-index: 100; box-shadow: 0 20px 50px rgba(0,0,0,0.6); }
+    .card.red { color: #dc2626; background: linear-gradient(150deg, #fff 0%, #ffe5e5 100%); }
+    .card.black { color: #1f2937; background: linear-gradient(150deg, #fff 0%, #e8e8e8 100%); }
+    .card .suit { font-size: 1.6rem; line-height: 1; }
+    .card .value { font-size: 1rem; }
+    .card.dealing { animation: dealCard 0.6s ease-out forwards; }
+    @keyframes dealCard { 0% { transform: translate(-300px, -300px) rotate(-360deg) scale(0.3); opacity: 0; } 40% { opacity: 1; } 100% { transform: translate(0, 0) rotate(0deg) scale(1); opacity: 1; } }
+    .card.flip { animation: flipCard 0.7s ease-in-out; }
+    @keyframes flipCard { 0%, 100% { transform: rotateY(0deg); } 50% { transform: rotateY(180deg); } }
+    .card.win { animation: winPulse 0.6s ease-in-out infinite; }
+    @keyframes winPulse { 0%, 100% { box-shadow: 0 0 15px var(--gold), 0 0 30px rgba(255,215,0,0.3); } 50% { box-shadow: 0 0 35px var(--gold), 0 0 60px rgba(255,215,0,0.6); } }
+    .table-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; max-width: 220px; z-index: 2; }
+    .controls { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-top: 22px; animation: slideUp 0.6s ease-out 0.4s both; }
+    .controls button { font-size: 1.05rem; padding: 16px 28px; }
+    .players-section { background: linear-gradient(145deg, rgba(0,0,0,0.7), rgba(40,0,0,0.7)); border-radius: 25px; padding: 22px; margin-top: 22px; border: 4px solid var(--gold); box-shadow: 0 0 40px rgba(255,215,0,0.25); animation: slideUp 0.6s ease-out 0.6s both; }
+    .players-section h2 { font-size: 1.3rem; margin-bottom: 18px; text-align: center; color: var(--gold); text-transform: uppercase; letter-spacing: 3px; }
+    .players-list { display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; }
+    .player-card { background: linear-gradient(145deg, rgba(0,0,0,0.75), rgba(50,0,0,0.75)); padding: 18px; border-radius: 20px; text-align: center; min-width: 150px; border: 2px solid transparent; transition: all 0.4s; animation: popIn 0.5s ease-out both; }
+    .player-card.is-me { border-color: #00d9ff; box-shadow: 0 0 25px rgba(0,217,255,0.5); }
+    .player-card:hover { transform: translateY(-8px); border-color: var(--gold); box-shadow: 0 15px 40px rgba(0,0,0,0.4); }
+    .player-card .name { font-size: 1.1rem; margin-bottom: 10px; color: var(--gold); font-weight: 600; }
+    .player-card .balance { font-size: 1rem; color: #22c55e; margin-bottom: 12px; font-weight: 600; }
+    .player-card .cards { display: flex; gap: 6px; justify-content: center; min-height: 78px; align-items: center; }
+    .player-card .card { width: 44px; height: 62px; font-size: 0.9rem; }
+    .player-card .card .suit { font-size: 1.3rem; }
+    .player-card .card .value { font-size: 0.75rem; }
+    .deal-to-btn { margin-top: 12px; font-size: 0.8rem; padding: 10px 18px; background: #22c55e; color: white; border-radius: 20px; border: none; cursor: pointer; transition: all 0.3s; }
+    .deal-to-btn:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(34,197,94,0.5); }
+    .remove-btn { margin-top: 8px; font-size: 0.75rem; padding: 8px 14px; background: #ef4444; color: white; border-radius: 20px; border: none; cursor: pointer; }
+    .bal-btn { margin: 3px; font-size: 0.7rem; padding: 6px 10px; background: #22c55e; color: white; border: none; border-radius: 15px; cursor: pointer; }
     .bal-btn.minus { background: #ef4444; }
-    
-    /* Debug Panel */
-    .debug-panel {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: #1f2937;
-      border: 3px solid #f59e0b;
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 80vw;
-      max-height: 80vh;
-      overflow: auto;
-      z-index: 1000;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-    }
+    .admin-section { margin-top: 12px; padding: 14px; background: rgba(0,0,0,0.5); border-radius: 20px; display: flex; align-items: center; gap: 12px; justify-content: center; }
+    .admin-section input { width: 140px; padding: 10px 14px; font-size: 0.85rem; }
+    .admin-section button { padding: 10px 18px; font-size: 0.85rem; }
+    .debug-panel { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(145deg, #1f2937, #0f172a); border: 5px solid var(--gold); border-radius: 25px; padding: 30px; max-width: 92vw; max-height: 88vh; overflow: auto; z-index: 1000; box-shadow: 0 25px 80px rgba(0,0,0,0.9), 0 0 50px rgba(255,215,0,0.35); animation: popIn 0.4s ease-out; }
     .debug-panel.visible { display: block; }
-    .debug-panel h3 { color: #f59e0b; margin-bottom: 15px; }
-    .debug-panel .close-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #ef4444;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .debug-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
-      gap: 5px;
-    }
-    .debug-card {
-      background: white;
-      color: #1f2937;
-      padding: 5px;
-      border-radius: 4px;
-      font-size: 0.7rem;
-      text-align: center;
-    }
+    .debug-panel h3 { color: var(--gold); margin-bottom: 22px; text-align: center; font-size: 1.4rem; }
+    .debug-panel .close-btn { position: absolute; top: 18px; right: 18px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 38px; height: 38px; cursor: pointer; font-size: 1.3rem; font-weight: bold; }
+    .debug-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 10px; }
+    .debug-card { background: white; color: #1f2937; padding: 10px; border-radius: 10px; font-size: 0.8rem; text-align: center; transition: all 0.3s; border: 2px solid transparent; }
+    .debug-card:hover { transform: scale(1.12); border-color: var(--gold); }
     .debug-card.red { color: #dc2626; }
     .debug-card.black { color: #1f2937; }
-    .debug-card .idx { font-size: 0.5rem; color: #6b7280; }
-    .overlay {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0,0,0,0.7);
-      z-index: 999;
-    }
+    .debug-card .idx { font-size: 0.65rem; color: #6b7280; }
+    .debug-card .val { font-weight: 900; font-size: 0.95rem; }
+    .overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 999; backdrop-filter: blur(8px); }
     .overlay.visible { display: block; }
+    .fortune { position: fixed; bottom: 25px; right: 25px; padding: 18px 28px; background: linear-gradient(135deg, var(--red), var(--red-light)); border-radius: 20px; border: 4px solid var(--gold); color: var(--gold); font-size: 1.2rem; box-shadow: 0 12px 40px rgba(0,0,0,0.6); animation: fortunePop 3.5s ease-in-out infinite; z-index: 100; font-weight: 600; }
+    @keyframes fortunePop { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+    .glow { animation: glowPulse 2s ease-in-out infinite; }
+    @keyframes glowPulse { 0%, 100% { box-shadow: 0 0 15px var(--gold); } 50% { box-shadow: 0 0 40px var(--gold), 0 0 60px rgba(255,215,0,0.4); } }
+    @media (max-width: 600px) { h1 { font-size: 1.8rem; } .table { padding: 22px; min-height: 320px; } .deck-card { width: 42px; height: 60px; } .card { width: 42px; height: 60px; } .player-card { min-width: 120px; padding: 12px; } .fortune { font-size: 0.9rem; padding: 12px 18px; } }
   </style>
 </head>
 <body>
+  <div class="lantern">🏮</div>
+  <div class="lantern">🏮</div>
+  <div class="particles" id="particles"></div>
   <div class="container">
     <header>
-      <h1>🐲 新年快乐 🧧<br><small>Chinese New Year Card Game</small></h1>
+      <h1>🐲 新年快乐 🧧</h1>
+      <p class="subtitle">Chinese New Year Card Game</p>
       <div class="join-section">
         <input type="text" id="playerName" placeholder="Your name" />
-        <button id="joinBtn" class="btn-primary">Join Table</button>
-        <div style="margin-top:10px;padding:10px;background:rgba(0,0,0,0.3);border-radius:8px;">
-          <input type="password" id="adminPassword" placeholder="Admin password" style="width:120px;padding:8px;font-size:0.8rem;" />
-          <button id="adminBtn" style="padding:8px 12px;background:#f59e0b;color:#000;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;">Set Admin</button>
+        <button id="joinBtn" class="btn-primary">Join Table 🎴</button>
+        <div class="admin-section">
+          <input type="password" id="adminPassword" placeholder="Admin password" />
+          <button id="adminBtn" class="btn-warning">Set Admin 🔐</button>
         </div>
       </div>
     </header>
-
     <div class="table">
       <div class="deck-area">
         <div class="deck-cards">
@@ -229,253 +134,77 @@
           <div class="deck-card"></div>
           <div class="deck-card"></div>
         </div>
-        <span class="deck-count"><strong id="deckCount">52</strong> cards</span>
+        <span class="deck-count"><strong id="deckCount">52</strong> 🃏 cards</span>
       </div>
-
       <div class="table-controls">
         <button id="shuffleBtn" class="btn-warning">🔀 Shuffle</button>
         <button id="resetBtn" class="btn-danger">🔄 Reset</button>
-        <button id="debugDeckBtn" class="btn-debug" style="display:none;">🔍 Debug Deck</button>
+        <button id="debugDeckBtn" class="btn-debug">🔍 Debug</button>
       </div>
-
       <div class="players-around-table" id="playersAroundTable"></div>
       <div class="table-center" id="tableCenter"></div>
     </div>
-
     <div class="controls">
       <button id="dealToAllBtn" class="btn-success">🎯 Deal to All</button>
       <button id="dealToCenterBtn" class="btn-secondary">📤 Deal to Table</button>
       <button id="clearCenterBtn" class="btn-danger">🗑️ Clear Table</button>
     </div>
-
     <div class="players-section">
-      <h2>Players</h2>
+      <h2>🎴 Players</h2>
       <div class="players-list" id="playersList"></div>
     </div>
   </div>
-
-  <!-- Debug Overlay -->
+  <div class="fortune" id="fortune">🧧 发财好市 🧧</div>
   <div class="overlay" id="debugOverlay"></div>
-  
-  <!-- Debug Panel -->
   <div class="debug-panel" id="debugPanel">
     <button class="close-btn" onclick="closeDebug()">×</button>
-    <h3>🔍 Deck Sequence (Top to Bottom)</h3>
+    <h3>🔍 Deck Sequence</h3>
     <div class="debug-grid" id="debugGrid"></div>
   </div>
-
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    // =======================================================================
-    // SOCKET CONNECTION
-    // =======================================================================
+    function createParticles() { const c = document.getElementById('particles'); for (let i = 0; i < 25; i++) { const p = document.createElement('div'); p.className = 'particle'; p.style.left = Math.random() * 100 + '%'; p.style.animationDelay = Math.random() * 12 + 's'; p.style.animationDuration = (8 + Math.random() * 8) + 's'; p.style.width = (4 + Math.random() * 8) + 'px'; p.style.height = p.style.width; c.appendChild(p); } }
+    createParticles();
+    const fortunes = ['🧧 发财好市 🧧','🐲 新年快乐 🐲','🧧 恭喜发财 🧧','🎊 万事如意 🎊','🧧 步步高升 🧧','🐲 虎虎生威 🐲','🎉 财源广进 🎉','🧧 金玉满堂 🧧'];
+    let fortuneIndex = 0; const fortuneEl = document.getElementById('fortune');
+    setInterval(() => { fortuneIndex = (fortuneIndex + 1) % fortunes.length; fortuneEl.style.animation = 'none'; fortuneEl.offsetHeight; fortuneEl.style.animation = 'fortunePop 3.5s ease-in-out infinite'; fortuneEl.textContent = fortunes[fortuneIndex]; }, 3500);
     const socket = io();
-
-    // =======================================================================
-    // DOM ELEMENTS
-    // =======================================================================
-    const elements = {
-      playerName: document.getElementById('playerName'),
-      joinBtn: document.getElementById('joinBtn'),
-      adminPassword: document.getElementById('adminPassword'),
-      adminBtn: document.getElementById('adminBtn'),
-      shuffleBtn: document.getElementById('shuffleBtn'),
-      resetBtn: document.getElementById('resetBtn'),
-      dealToAllBtn: document.getElementById('dealToAllBtn'),
-      dealToCenterBtn: document.getElementById('dealToCenterBtn'),
-      clearCenterBtn: document.getElementById('clearCenterBtn'),
-      debugDeckBtn: document.getElementById('debugDeckBtn'),
-      deckCount: document.getElementById('deckCount'),
-      playersAroundTable: document.getElementById('playersAroundTable'),
-      tableCenter: document.getElementById('tableCenter'),
-      playersList: document.getElementById('playersList'),
-      debugPanel: document.getElementById('debugPanel'),
-      debugOverlay: document.getElementById('debugOverlay'),
-      debugGrid: document.getElementById('debugGrid')
-    };
-
-    // =======================================================================
-    // EVENT LISTENERS
-    // =======================================================================
+    const e = { playerName: document.getElementById('playerName'), joinBtn: document.getElementById('joinBtn'), adminPassword: document.getElementById('adminPassword'), adminBtn: document.getElementById('adminBtn'), shuffleBtn: document.getElementById('shuffleBtn'), resetBtn: document.getElementById('resetBtn'), dealToAllBtn: document.getElementById('dealToAllBtn'), dealToCenterBtn: document.getElementById('dealToCenterBtn'), clearCenterBtn: document.getElementById('clearCenterBtn'), debugDeckBtn: document.getElementById('debugDeckBtn'), deckCount: document.getElementById('deckCount'), playersAroundTable: document.getElementById('playersAroundTable'), tableCenter: document.getElementById('tableCenter'), playersList: document.getElementById('playersList'), debugPanel: document.getElementById('debugPanel'), debugOverlay: document.getElementById('debugOverlay'), debugGrid: document.getElementById('debugGrid') };
     document.addEventListener('DOMContentLoaded', () => {
-      
-      // Join game
-      elements.playerName.addEventListener('keypress', (e) => { 
-        if (e.key === 'Enter') elements.joinBtn.click(); 
-      });
-      elements.joinBtn.addEventListener('click', () => {
-        const name = elements.playerName.value.trim();
-        if (!name) { alert('Please enter your name'); return; }
-        socket.emit('join', name);
-        elements.playerName.disabled = true;
-        elements.joinBtn.disabled = true;
-        elements.joinBtn.textContent = 'Joined!';
-      });
-
-      // Admin login
-      elements.adminPassword.addEventListener('keypress', (e) => { 
-        if (e.key === 'Enter') elements.adminBtn.click(); 
-      });
-      elements.adminBtn.addEventListener('click', () => {
-        const password = elements.adminPassword.value;
-        if (!password) { alert('Enter password'); return; }
-        socket.emit('setAdminPassword', password);
-      });
-
-      // Admin controls
-      elements.shuffleBtn.addEventListener('click', () => { socket.emit('shuffle'); });
-      elements.resetBtn.addEventListener('click', () => { resetGame(); });
-      elements.dealToCenterBtn.addEventListener('click', () => { socket.emit('dealToCenter'); });
-      elements.dealToAllBtn.addEventListener('click', () => { socket.emit('dealToAll'); });
-      elements.clearCenterBtn.addEventListener('click', () => { socket.emit('clearCenter'); });
-      
-      // DEBUG: Show deck sequence
-      elements.debugDeckBtn.addEventListener('click', () => { 
-        socket.emit('debugShowDeck'); 
-      });
-
-      // Close debug panel
-      elements.debugOverlay.addEventListener('click', closeDebug);
+      e.playerName.addEventListener('keypress', x => { if (x.key === 'Enter') e.joinBtn.click(); });
+      e.joinBtn.addEventListener('click', () => { const n = e.playerName.value.trim(); if (!n) { alert('Enter name'); return; } socket.emit('join', n); e.playerName.disabled = true; e.joinBtn.disabled = true; e.joinBtn.textContent = '✅ Joined!'; e.joinBtn.classList.add('glow'); setTimeout(() => e.joinBtn.classList.remove('glow'), 2500); });
+      e.adminPassword.addEventListener('keypress', x => { if (x.key === 'Enter') e.adminBtn.click(); });
+      e.adminBtn.addEventListener('click', () => { const p = e.adminPassword.value; if (!p) { alert('Enter password'); return; } socket.emit('setAdminPassword', p); });
+      e.shuffleBtn.addEventListener('click', () => socket.emit('shuffle'));
+      e.resetBtn.addEventListener('click', () => resetGame());
+      e.dealToCenterBtn.addEventListener('click', () => socket.emit('dealToCenter'));
+      e.dealToAllBtn.addEventListener('click', () => socket.emit('dealToAll'));
+      e.clearCenterBtn.addEventListener('click', () => socket.emit('clearCenter'));
+      e.debugDeckBtn.addEventListener('click', () => socket.emit('debugShowDeck'));
+      e.debugOverlay.addEventListener('click', closeDebug);
     });
-
-    // =======================================================================
-    // SOCKET EVENT HANDLERS
-    // =======================================================================
-    
-    // Update game state
-    socket.on('updateGame', (gameState) => { 
-      renderGame(gameState);
-      
-      // Check if current user is in players list - if not, reset join button
-      const myPlayer = gameState.players.find(p => p.id === socket.id);
-      if (!myPlayer) {
-        elements.playerName.disabled = false;
-        elements.joinBtn.disabled = false;
-        elements.joinBtn.textContent = 'Join Table';
-      }
-      
-      // Show/hide admin controls based on admin status
-      const isAdmin = gameState.adminId && socket.id === gameState.adminId;
-      const controls = [
-        elements.dealToAllBtn,
-        elements.dealToCenterBtn,
-        elements.clearCenterBtn,
-        elements.shuffleBtn,
-        elements.resetBtn,
-        elements.debugDeckBtn
-      ];
-      
-      controls.forEach(ctrl => {
-        ctrl.style.display = isAdmin ? 'inline-block' : 'none';
-      });
-    });
-
-    // Error messages
-    socket.on('error', (msg) => { 
-      alert(msg); 
-    });
-
-    // DEBUG: Receive deck sequence
-    socket.on('debugDeck', (deck) => {
-      showDebugDeck(deck);
-    });
-
-    // =======================================================================
-    // RENDER FUNCTIONS
-    // =======================================================================
-
-    function renderCard(card) {
-      if (!card) return '<div class="card back"></div>';
-      return '<div class="card ' + card.color + '">' + card.value + card.suit + '</div>';
+    socket.on('updateGame', gs => { renderGame(gs); const ia = gs.adminId && socket.id === gs.adminId; [e.dealToAllBtn, e.dealToCenterBtn, e.clearCenterBtn, e.shuffleBtn, e.resetBtn, e.debugDeckBtn].forEach(c => { c.style.display = ia ? 'inline-block' : 'none'; if (ia) { c.classList.add('glow'); setTimeout(() => c.classList.remove('glow'), 2500); } }); });
+    socket.on('error', m => alert(m));
+    socket.on('debugDeck', d => showDebugDeck(d));
+    function renderCard(c, i) { if (!c) return '<div class="card back"></div>'; return '<div class="card ' + c.color + '" style="animation-delay:' + (i * 0.08) + 's"><div class="value">' + c.value + '</div><div class="suit">' + c.suit + '</div></div>'; }
+    function renderGame(gs) {
+      const ia = gs.adminId && socket.id === gs.adminId;
+      const oldC = parseInt(e.deckCount.textContent); const newC = gs.deck.length; e.deckCount.textContent = newC;
+      if (newC !== oldC) { e.deckCount.style.transform = 'scale(1.4)'; e.deckCount.style.color = '#fff'; setTimeout(() => { e.deckCount.style.transform = 'scale(1)'; e.deckCount.style.color = ''; }, 350); }
+      if (gs.players.length === 0) { e.playersAroundTable.innerHTML = '<p style="color:var(--gold);font-size:1.1rem">🎴 Join to play! 🎴</p>'; }
+      else { e.playersAroundTable.innerHTML = gs.players.map((p, i) => '<div class="table-player" style="animation-delay:' + (i * 0.1) + 's"><div class="name">' + p.name + '</div></div>').join(''); }
+      if (gs.centerCards.length === 0) { e.tableCenter.innerHTML = '<p style="color:var(--gold);font-size:0.9rem;opacity:0.7">Cards dealt to table</p>'; }
+      else { e.tableCenter.innerHTML = gs.centerCards.map((c, i) => '<div class="card ' + c.color + '" onclick="returnToDeck(' + i + ')" style="animation-delay:' + (i * 0.1) + 's">' + c.value + '<span class="suit">' + c.suit + '</span></div>').join(''); }
+      if (gs.players.length === 0) { e.playersList.innerHTML = '<p style="color:#9ca3af;font-size:1rem">No players yet. Join below!</p>'; }
+      else { e.playersList.innerHTML = gs.players.map((p, i) => { const im = p.id === socket.id; const bal = p.balance || 0; const ch = p.cards.length > 0 ? p.cards.map((c, j) => renderCard(c, j)).join('') : '<span style="color:#6b7280;font-size:0.8rem">No cards</span>'; return '<div class="player-card ' + (im ? 'is-me' : '') + '" style="animation-delay:' + (i * 0.1) + 's"><div class="name">' + p.name + (p.id === gs.adminId ? ' 👑' : '') + (im ? ' 👈' : '') + '</div><div class="balance">💰 ' + bal + '</div><div class="cards">' + ch + '</div>' + (ia ? '<button class="deal-to-btn" onclick="dealToPlayer(\'' + p.id + '\')">Deal 1</button>' : '') + (ia ? '<button class="bal-btn" onclick="updateBalance(\'' + p.id + '\',1)">+1</button><button class="bal-btn" onclick="updateBalance(\'' + p.id + '\',5)">+5</button><button class="bal-btn" onclick="updateBalance(\'' + p.id + '\',10)">+10</button><button class="bal-btn minus" onclick="updateBalance(\'' + p.id + '\',-1)">-1</button><button class="bal-btn minus" onclick="updateBalance(\'' + p.id + '\',-5)">-5</button><button class="bal-btn minus" onclick="updateBalance(\'' + p.id + '\',-10)">-10</button><button class="remove-btn" onclick="removePlayer(\'' + p.id + '\')">Remove</button>' : '') + '</div>'; }).join(''); }
     }
-
-    function renderGame(gameState) {
-      const isAdmin = gameState.adminId && socket.id === gameState.adminId;
-      elements.deckCount.textContent = gameState.deck.length;
-
-      // Render players around table
-      if (gameState.players.length === 0) {
-        elements.playersAroundTable.innerHTML = '<p style="color:#86efac;font-size:0.9rem">Join to play!</p>';
-      } else {
-        elements.playersAroundTable.innerHTML = gameState.players.map(player => {
-          return '<div class="table-player"><div class="name">' + player.name + '</div></div>';
-        }).join('');
-      }
-
-      // Render center cards
-      if (gameState.centerCards.length === 0) {
-        elements.tableCenter.innerHTML = '<p style="color:#86efac;font-size:0.8rem">Cards dealt to table</p>';
-      } else {
-        elements.tableCenter.innerHTML = gameState.centerCards.map((card, idx) => 
-          '<div class="card ' + card.color + '" onclick="returnToDeck(' + idx + ')">' + card.value + card.suit + '</div>'
-        ).join('');
-      }
-
-      // Render player list
-      if (gameState.players.length === 0) {
-        elements.playersList.innerHTML = '<p style="color:#9ca3af">No players yet. Join below!</p>';
-      } else {
-        elements.playersList.innerHTML = gameState.players.map(player => {
-          const isMe = player.id === socket.id;
-          const balance = player.balance || 0;
-          const cardsHtml = player.cards.length > 0
-            ? player.cards.map(c => renderCard(c)).join('')
-            : '<span style="color:#6b7280;font-size:0.75rem">No cards</span>';
-            
-          return '<div class="player-card ' + (isMe ? 'is-me' : '') + '">' +
-            '<div class="name">' + player.name + 
-            (player.id === gameState.adminId ? ' 👑' : '') + 
-            (isMe ? ' 👈' : '') + 
-            '</div>' +
-            '<div class="balance">💰 ' + balance + '</div>' +
-            '<div class="cards">' + cardsHtml + '</div>' +
-            (isAdmin ? '<button class="deal-to-btn" onclick="dealToPlayer(\'' + player.id + '\')">Deal 1</button>' : '') +
-            (isAdmin ? '<button class="bal-btn" onclick="updateBalance(\'' + player.id + '\',1)">+1</button>' : '') +
-            (isAdmin ? '<button class="bal-btn" onclick="updateBalance(\'' + player.id + '\',5)">+5</button>' : '') +
-            (isAdmin ? '<button class="bal-btn" onclick="updateBalance(\'' + player.id + '\',10)">+10</button>' : '') +
-            (isAdmin ? '<button class="bal-btn minus" onclick="updateBalance(\'' + player.id + '\',-1)">-1</button>' : '') +
-            (isAdmin ? '<button class="bal-btn minus" onclick="updateBalance(\'' + player.id + '\',-5)">-5</button>' : '') +
-            (isAdmin ? '<button class="bal-btn minus" onclick="updateBalance(\'' + player.id + '\',-10)">-10</button>' : '') +
-            (isAdmin ? '<button class="remove-btn" onclick="removePlayer(\'' + player.id + '\')">Remove</button>' : '') +
-            '</div>';
-        }).join('');
-      }
-    }
-
-    // =======================================================================
-    // DEBUG FUNCTIONS
-    // =======================================================================
-    
-    function showDebugDeck(deck) {
-      elements.debugGrid.innerHTML = deck.map(card => 
-        '<div class="debug-card ' + card.color + '">' +
-        '<div class="idx">#' + card.index + '</div>' +
-        card.value + card.suit +
-        '</div>'
-      ).join('');
-      
-      elements.debugPanel.classList.add('visible');
-      elements.debugOverlay.classList.add('visible');
-    }
-
-    function closeDebug() {
-      elements.debugPanel.classList.remove('visible');
-      elements.debugOverlay.classList.remove('visible');
-    }
-
-    // =======================================================================
-    // PLAYER ACTIONS
-    // =======================================================================
-    
-    function dealToPlayer(playerId) { socket.emit('dealToPlayer', playerId); }
-    function removePlayer(playerId) { socket.emit('removePlayer', playerId); }
-    function updateBalance(playerId, amount) { socket.emit('updateBalance', { playerId, amount }); }
-    function resetGame() { 
-      if(confirm('Reset game? All players will be removed.')){ 
-        socket.emit('resetGame'); 
-      } 
-    }
-    function returnToDeck(cardIndex) { socket.emit('returnCardToDeck', cardIndex); }
+    function showDebugDeck(d) { e.debugGrid.innerHTML = d.map(c => '<div class="debug-card ' + c.color + '"><div class="idx">#' + c.index + '</div><div class="val">' + c.value + c.suit + '</div></div>').join(''); e.debugPanel.classList.add('visible'); e.debugOverlay.classList.add('visible'); }
+    function closeDebug() { e.debugPanel.classList.remove('visible'); e.debugOverlay.classList.remove('visible'); }
+    function dealToPlayer(id) { socket.emit('dealToPlayer', id); }
+    function removePlayer(id) { socket.emit('removePlayer', id); }
+    function updateBalance(id, amt) { socket.emit('updateBalance', { playerId: id, amount: amt }); }
+    function resetGame() { if (confirm('Reset game? All players will be removed.')) socket.emit('resetGame'); }
+    function returnToDeck(idx) { socket.emit('returnCardToDeck', idx); }
   </script>
 </body>
 </html>
