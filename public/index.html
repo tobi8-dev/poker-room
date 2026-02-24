@@ -13,7 +13,31 @@
       color: white;
       padding: 15px;
     }
-    .container { max-width: 900px; margin: 0 auto; }
+    .container { max-width: 900px; margin: 0 auto; animation: fadeIn 0.5s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Fortune badge */
+    .fortune {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #8B0000, #DC2626);
+      border-radius: 25px;
+      border: 2px solid #FFD700;
+      color: #FFD700;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      z-index: 100;
+      animation: fortunePulse 3s ease-in-out infinite;
+    }
+    @keyframes fortunePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
     header { text-align: center; margin-bottom: 20px; }
     h1 { font-size: 1.8rem; margin-bottom: 15px; }
     .join-section { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
@@ -25,7 +49,11 @@
       cursor: pointer;
       font-size: 0.95rem;
       font-weight: 500;
-      transition: transform 0.1s;
+      transition: transform 0.1s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
     button:active { transform: scale(0.96); }
     .btn-primary { background: #00d9ff; color: #000; }
@@ -102,6 +130,12 @@
       font-weight: bold;
       font-size: 0.9rem;
       box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 4px 8px 15px rgba(0,0,0,0.5);
+      z-index: 10;
     }
     .card.red { color: #dc2626; }
     .card.black { color: #1f2937; }
@@ -264,8 +298,19 @@
     <div class="debug-grid" id="debugGrid"></div>
   </div>
 
+  <!-- Fortune -->
+  <div class="fortune" id="fortune">🧧 恭喜发财 🧧</div>
+
   <script src="/socket.io/socket.io.js"></script>
   <script>
+    // Fortune rotation
+    const fortunes = ['🧧 恭喜发财 🐲','🐲 新年快乐 🎊','🧧 步步高升 💰','🎊 万事如意 🧧','🧧 财源广进 🎉'];
+    let fortuneIndex = 0;
+    setInterval(() => {
+      fortuneIndex = (fortuneIndex + 1) % fortunes.length;
+      document.getElementById('fortune').textContent = fortunes[fortuneIndex];
+    }, 4000);
+    
     // =======================================================================
     // SOCKET CONNECTION
     // =======================================================================
