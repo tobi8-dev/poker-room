@@ -15,7 +15,7 @@ let gameState = {
   centerCards: [],
   currentPlayerIndex: 0,
   adminId: null,
-  adminPassword: 'secret123'
+  adminPassword: '8888'
 };
 
 function generateDeck() {
