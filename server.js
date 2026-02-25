@@ -110,23 +110,36 @@ const Blackjack = {
         if (!state.blackjack) Blackjack.init();
         
         const player = state.players.find(p => p.id === socketId);
-        if (!player || !state.blackjack.players[socketId]) return false;
-        if (bet < 1 || bet > player.balance) return false;
+        if (!player) {
+            console.log(`[BET ERROR] Player not found: ${socketId}`);
+            return false;
+        }
+        
+        // Initialize player in blackjack if not exists
+        if (!state.blackjack.players[socketId]) {
+            state.blackjack.players[socketId] = { bet: 0, result: null, standing: false, busted: false };
+        }
+        
+        if (bet < 1 || bet > player.balance) {
+            console.log(`[BET ERROR] Invalid bet ${bet} for player ${socketId}, balance: ${player.balance}`);
+            return false;
+        }
         
         player.balance -= bet;
-        state.blackjack.players[socketId] = { bet, result: null, standing: false, busted: false };
+        state.blackjack.players[socketId].bet = bet;
         
-        // Check if all can start
+        console.log(`[BET] Player ${socketId} bet ${bet}, remaining balance: ${player.balance}`);
+        
+        // Check if can start (single player can start)
         this.checkStart();
         return true;
     },
     
     checkStart() {
-        const allReady = state.players
-            .filter(p => p.balance > 0)
-            .every(p => state.blackjack.players[p.id]);
+        // Check if any player has placed a bet - can start with just 1 player
+        const playersWithBets = Object.keys(state.blackjack.players).filter(id => state.blackjack.players[id].bet > 0);
         
-        if (allReady && state.players.length > 0) {
+        if (playersWithBets.length > 0) {
             this.startRound();
         }
         broadcastState();
@@ -444,6 +457,7 @@ io.on('connection', (socket) => {
 
     // Blackjack actions
     socket.on('placeBet', ({ bet }) => {
+        console.log(`[BET] ${socket.id} betting ${bet}`);
         Blackjack.placeBet(socket.id, bet);
     });
 
