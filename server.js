@@ -118,12 +118,11 @@ function placeBet(socketId, bet) {
     player.busted = false;
     player.result = null;
     
-    // Check if all ready players have bet
-    const allPlayers = Object.keys(blackjack.players);
-    const allBet = allPlayers.every(id => blackjack.players[id].bet > 0 || blackjack.players[id].balance === 0);
-    const hasPlayers = allPlayers.length > 0;
+    // Check if we can start dealing (all players with balance > 0 have bet)
+    const playersWithBalance = Object.keys(blackjack.players).filter(id => blackjack.players[id].balance > 0);
+    const allBet = playersWithBalance.every(id => blackjack.players[id].bet > 0);
     
-    if (allBet && hasPlayers && blackjack.phase === 'betting') {
+    if (allBet && playersWithBalance.length > 0 && blackjack.phase === 'betting') {
         startDealing();
     }
     
