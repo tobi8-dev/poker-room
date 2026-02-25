@@ -845,8 +845,8 @@
       if (gameState.players.length === 0) {
         elements.playersAroundTable.innerHTML = '<p style="color:#86efac;font-size:0.9rem">Join to play!</p>';
       } else {
-        elements.playersAroundTable.innerHTML = gameState.players.map(player => {
-          return '<div class="table-player"><div class="name">' + player.name + '</div></div>';
+        elements.playersAroundTable.innerHTML = gameState.players.map((player, idx) => {
+          return '<div class="table-player"><div class="name">#' + (idx + 1) + ' ' + player.name + '</div></div>';
         }).join('');
       }
 
@@ -863,7 +863,7 @@
       if (gameState.players.length === 0) {
         elements.playersList.innerHTML = '<p style="color:#9ca3af">No players yet. Join below!</p>';
       } else {
-        elements.playersList.innerHTML = gameState.players.map(player => {
+        elements.playersList.innerHTML = gameState.players.map((player, idx) => {
           const isMe = player.id === socket.id;
           const balance = player.balance || 0;
           const cardsHtml = player.cards.length > 0
@@ -871,7 +871,7 @@
             : '<span style="color:#6b7280;font-size:0.75rem">No cards</span>';
             
           return '<div class="player-card ' + (isMe ? 'is-me' : '') + '">' +
-            '<div class="name">' + player.name + 
+            '<div class="name">#' + (idx + 1) + ' ' + player.name + 
             (player.id === gameState.adminId ? ' 👑' : '') + 
             (isMe ? ' 👈' : '') + 
             '</div>' +
