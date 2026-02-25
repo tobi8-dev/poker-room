@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐲 CNY Card Games</title>
+  <title>🐲 CNY Card Game 🧧</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -13,133 +13,129 @@
       color: white;
       padding: 15px;
     }
-    .container { max-width: 900px; margin: 0 auto; }
-    
-    /* Welcome Screen */
-    #welcomeScreen { 
-      display: block; 
-      text-align: center; 
-      padding: 60px 20px; 
-    }
-    #welcomeScreen h1 { 
-      font-size: 3rem; 
-      margin-bottom: 10px; 
-    }
-    #welcomeScreen .subtitle { 
-      font-size: 1.3rem; 
-      color: #ffd700; 
-      margin-bottom: 40px; 
-    }
-    .game-cards {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin-bottom: 40px;
-    }
-    .game-card {
-      background: rgba(0,0,0,0.5);
-      border: 3px solid #ffd700;
-      border-radius: 16px;
-      padding: 30px;
-      cursor: pointer;
-      transition: all 0.3s;
-      width: 200px;
-    }
-    .game-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    }
-    .game-card.selected {
-      border-color: #00d9ff;
-      background: rgba(0,217,255,0.2);
-    }
-    .game-card .icon { font-size: 3rem; margin-bottom: 10px; }
-    .game-card .name { font-size: 1.3rem; font-weight: bold; color: #ffd700; }
-    .game-card .desc { font-size: 0.85rem; color: #ccc; margin-top: 8px; }
-    .game-card .coming { 
-      font-size: 0.75rem; 
-      color: #ef4444; 
-      margin-top: 10px;
+    .container { max-width: 900px; margin: 0 auto; animation: fadeIn 0.5s ease-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     
-    #welcomeScreen input {
-      padding: 15px 20px;
-      border-radius: 10px;
-      border: 2px solid #ffd700;
-      font-size: 1.1rem;
-      width: 250px;
-      background: rgba(255,255,255,0.95);
-    }
-    #welcomeScreen button {
-      padding: 15px 30px;
-      border-radius: 10px;
-      border: none;
-      font-size: 1.1rem;
-      font-weight: bold;
-      background: #00d9ff;
-      color: #000;
-      cursor: pointer;
-      margin-left: 10px;
-    }
-    
-    /* Game Screen */
-    #gameScreen { display: none; }
-    
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(0,0,0,0.4);
+    /* Fortune badge */
+    .fortune {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
       padding: 12px 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
+      background: linear-gradient(135deg, #8B0000, #DC2626);
+      border-radius: 25px;
+      border: 2px solid #FFD700;
+      color: #FFD700;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+      z-index: 100;
+      animation: fortunePulse 3s ease-in-out infinite;
     }
-    .header .title { font-size: 1.3rem; color: #ffd700; font-weight: bold; }
-    .header .info { display: flex; gap: 20px; align-items: center; }
-    .header .name { color: #00d9ff; }
-    .header .balance { color: #22c55e; font-weight: bold; }
-    .header button {
-      padding: 8px 16px;
-      border-radius: 6px;
+    @keyframes fortunePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+    header { text-align: center; margin-bottom: 20px; }
+    h1 { font-size: 1.8rem; margin-bottom: 15px; }
+    .join-section { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    input { padding: 12px 16px; border-radius: 8px; border: none; font-size: 1rem; width: 160px; }
+    button {
+      padding: 12px 20px;
+      border-radius: 8px;
       border: none;
-      background: #6b7280;
-      color: white;
       cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: transform 0.1s, box-shadow 0.2s;
     }
-    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    button:active { transform: scale(0.96); }
+    .btn-primary { background: #00d9ff; color: #000; }
+    .btn-secondary { background: #a855f7; color: white; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-warning { background: #f59e0b; color: #000; }
+    .btn-success { background: #22c55e; color: white; }
+    .btn-debug { background: #6b7280; color: white; font-size: 0.75rem; padding: 6px 10px; }
+
     .table {
-      background: linear-gradient(180deg, #1e3a5f 0%, #0d2137 100%);
+      background: #8B0000; border-color: #D4AF37;
       border-radius: 20px;
       padding: 30px;
       margin: 20px 0;
-      border: 4px solid #ffd700;
+      border: 12px solid #854d0e;
+      box-shadow: inset 0 0 40px rgba(0,0,0,0.4), 0 15px 40px rgba(0,0,0,0.5);
       min-height: 350px;
+      position: relative;
     }
-    
-    .dealer-area { text-align: center; margin-bottom: 30px; }
-    .dealer-area .label { font-size: 1.1rem; color: #ffd700; margin-bottom: 15px; }
-    .dealer-area .cards { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-    .dealer-area .score { font-size: 1.5rem; font-weight: bold; margin-top: 10px; }
-    
-    .player-area { text-align: center; }
-    .player-area .label { font-size: 1.1rem; color: #00d9ff; margin-bottom: 15px; }
-    .player-area .cards { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-    .player-area .score { font-size: 1.5rem; font-weight: bold; margin-top: 10px; }
-    .player-area .bet-info { font-size: 1rem; color: #f59e0b; margin-top: 5px; }
-    
+    .deck-area {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .deck-count { font-size: 0.85rem; color: #86efac; }
+    .deck-cards { display: flex; }
+    .deck-card {
+      width: 50px;
+      height: 70px;
+      background: linear-gradient(135deg, #dc2626 0%, #fbbf24 50%, #dc2626 100%);
+      border-radius: 6px;
+      border: 2px solid white;
+      margin-left: -20px;
+    }
+    .deck-card:first-child { margin-left: 0; }
+    .table-controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .table-controls button { font-size: 0.8rem; padding: 8px 12px; }
+    .players-around-table {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      padding: 20px;
+    }
+    .table-player { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+    .table-player .name {
+      font-size: 0.8rem;
+      background: rgba(0,0,0,0.6);
+      padding: 4px 10px;
+      border-radius: 12px;
+      white-space: nowrap;
+    }
+    .table-player .cards { display: flex; gap: 4px; }
     .card {
-      width: 70px;
-      height: 100px;
+      width: 45px;
+      height: 64px;
       background: white;
-      border-radius: 8px;
+      border-radius: 5px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 1.3rem;
-      box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
+      font-size: 0.9rem;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-8px) scale(1.05);
+      box-shadow: 4px 8px 15px rgba(0,0,0,0.5);
+      z-index: 10;
     }
     .card.red { color: #dc2626; }
     .card.black { color: #1f2937; }
@@ -147,390 +143,425 @@
       background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #7c3aed 100%);
       border: 2px solid #e9d5ff;
     }
-    .card .suit { font-size: 1.8rem; }
-    .card .value { font-size: 1.1rem; }
-    
-    .controls {
+    .table-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       display: flex;
-      gap: 15px;
-      justify-content: center;
-      margin-top: 25px;
       flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      max-width: 200px;
     }
-    .controls button {
-      padding: 12px 25px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: bold;
-    }
-    .controls button:hover { transform: translateY(-2px); }
-    .btn-hit { background: #22c55e; color: white; }
-    .btn-stand { background: #ef4444; color: white; }
-    .btn-double { background: #f59e0b; color: #000; }
-    .btn-new { background: #00d9ff; color: #000; }
-    
-    .bet-section {
-      text-align: center;
-      margin: 20px 0;
+    .controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 15px; }
+    .controls button { font-size: 0.9rem; }
+    .players-section {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
       padding: 15px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 10px;
-    }
-    .bet-section input {
-      padding: 10px 15px;
-      border-radius: 6px;
-      border: 2px solid #ffd700;
-      font-size: 1rem;
-      width: 80px;
-      text-align: center;
-    }
-    .bet-section button {
-      padding: 10px 20px;
-      border-radius: 6px;
-      border: none;
-      font-size: 0.9rem;
-      font-weight: bold;
-      background: #ffd700;
-      color: #000;
-      cursor: pointer;
-      margin-left: 8px;
-    }
-    
-    .message {
-      text-align: center;
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin: 15px 0;
-      padding: 12px;
-      border-radius: 8px;
-    }
-    .message.win { background: rgba(34,197,94,0.3); color: #22c55e; }
-    .message.lose { background: rgba(239,68,68,0.3); color: #ef4444; }
-    .message.push { background: rgba(255,255,255,0.2); }
-    .message.blackjack { background: rgba(255,215,0,0.3); color: #ffd700; }
-    .message.waiting { background: rgba(255,255,255,0.1); font-size: 1rem; }
-    
-    .other-players {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
       margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid rgba(255,255,255,0.2);
     }
-    .other-player {
+    .players-section h2 { font-size: 1rem; margin-bottom: 12px; text-align: center; color: #e9d5ff; }
+    .players-list { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .player-card {
       background: rgba(0,0,0,0.4);
-      padding: 8px 12px;
-      border-radius: 8px;
-      text-align: center;
-      min-width: 80px;
-    }
-    .other-player .name { font-size: 0.8rem; color: #aaa; }
-    .other-player .cards { display: flex; gap: 3px; justify-content: center; margin: 5px 0; }
-    .other-player .card { width: 30px; height: 42px; font-size: 0.6rem; }
-    .other-player.active { border: 2px solid #00d9ff; }
-    
-    .admin-panel {
-      background: rgba(0,0,0,0.5);
       padding: 12px;
-      border-radius: 8px;
-      margin-top: 15px;
+      border-radius: 10px;
+      text-align: center;
+      min-width: 120px;
+      border: 2px solid transparent;
+    }
+    .player-card.is-me { border-color: #00d9ff; }
+    .player-card .name { font-size: 0.9rem; margin-bottom: 8px; }
+    .player-card .cards { display: flex; gap: 4px; justify-content: center; min-height: 64px; align-items: center; }
+    .player-card .card { width: 35px; height: 50px; font-size: 0.75rem; }
+    .deal-to-btn { margin-top: 8px; font-size: 0.75rem; padding: 6px 12px; background: #22c55e; color: white; }
+    .remove-btn { margin-top: 5px; font-size: 0.7rem; padding: 4px 8px; background: #ef4444; color: white; }
+    .bal-btn { margin: 2px; font-size: 0.65rem; padding: 3px 6px; background: #22c55e; color: white; border: none; border-radius: 3px; }
+    .bal-btn.minus { background: #ef4444; }
+    
+    /* Debug Panel */
+    .debug-panel {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #1f2937;
+      border: 3px solid #f59e0b;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 80vw;
+      max-height: 80vh;
+      overflow: auto;
+      z-index: 1000;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    }
+    .debug-panel.visible { display: block; }
+    .debug-panel h3 { color: #f59e0b; margin-bottom: 15px; }
+    .debug-panel .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .debug-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+      gap: 5px;
+    }
+    .debug-card {
+      background: white;
+      color: #1f2937;
+      padding: 5px;
+      border-radius: 4px;
+      font-size: 0.7rem;
       text-align: center;
     }
-    .admin-panel input {
-      padding: 6px 10px;
-      border-radius: 4px;
-      border: 1px solid #ffd700;
-      background: white;
-      width: 80px;
-    }
-    .admin-panel button {
-      padding: 6px 12px;
-      border-radius: 4px;
-      border: none;
-      cursor: pointer;
-      background: #ffd700;
-      color: #000;
-      margin-left: 5px;
-    }
-    
-    .fortune {
+    .debug-card.red { color: #dc2626; }
+    .debug-card.black { color: #1f2937; }
+    .debug-card .idx { font-size: 0.5rem; color: #6b7280; }
+    .overlay {
+      display: none;
       position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 10px 20px;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: rgba(0,0,0,0.7);
-      border-radius: 20px;
-      color: #ffd700;
+      z-index: 999;
     }
+    .overlay.visible { display: block; }
   </style>
 </head>
 <body>
   <div class="container">
-    
-    <!-- Welcome Screen -->
-    <div id="welcomeScreen">
-      <h1>🐲 新年快乐 🧧</h1>
-      <p class="subtitle">Choose Your Game</p>
+    <header>
+      <h1>🐲 新年快乐 🧧<br><small>Chinese New Year Card Game</small></h1>
       
-      <div class="game-cards">
-        <div class="game-card selected" onclick="selectGame('blackjack')">
-          <div class="icon">🃏</div>
-          <div class="name">21点</div>
-          <div class="desc">Classic Blackjack</div>
-        </div>
-        <div class="game-card" onclick="selectGame('poker')">
-          <div class="icon">🃴</div>
-          <div class="name">德州扑克</div>
-          <div class="coming">Coming Soon</div>
-        </div>
+      <!-- Game Mode Selector -->
+      <div style="margin:15px 0;padding:10px;background:rgba(0,0,0,0.3);border-radius:10px;display:inline-block;">
+        <span style="margin-right:10px;color:#FFD700;">Game Mode:</span>
+        <label style="margin-right:15px;cursor:pointer;">
+          <input type="radio" name="gameMode" value="freeDeal" checked onchange="setGameMode()"> 
+          <span style="color:#fff;">🃏 Free Deal</span>
+        </label>
+        <label style="cursor:pointer;">
+          <input type="radio" name="gameMode" value="blackjack" onchange="setGameMode()"> 
+          <span style="color:#fff;">🎯 21点 Blackjack</span>
+        </label>
       </div>
       
-      <input type="text" id="playerName" placeholder="Enter your name" />
-      <button onclick="joinGame()">🎮 Play Now</button>
+      <div class="join-section">
+        <input type="text" id="playerName" placeholder="Your name" />
+        <button id="joinBtn" class="btn-primary">Join Table</button>
+        <div style="margin-top:10px;padding:10px;background:rgba(0,0,0,0.3);border-radius:8px;">
+          <input type="password" id="adminPassword" placeholder="Admin password" style="width:120px;padding:8px;font-size:0.8rem;" />
+          <button id="adminBtn" style="padding:8px 12px;background:#f59e0b;color:#000;border:none;border-radius:4px;cursor:pointer;font-size:0.8rem;">Set Admin</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="table">
+      <div class="deck-area">
+        <div class="deck-cards">
+          <div class="deck-card"></div>
+          <div class="deck-card"></div>
+          <div class="deck-card"></div>
+        </div>
+        <span class="deck-count"><strong id="deckCount">52</strong> cards</span>
+      </div>
+
+      <div class="table-controls">
+        <button id="shuffleBtn" class="btn-warning">🔀 Shuffle</button>
+        <button id="resetBtn" class="btn-danger">🔄 Reset</button>
+        <button id="debugDeckBtn" class="btn-debug" style="display:none;">🔍 Debug Deck</button>
+      </div>
+
+      <div class="players-around-table" id="playersAroundTable"></div>
+      <div class="table-center" id="tableCenter"></div>
     </div>
 
-    <!-- Game Screen -->
-    <div id="gameScreen">
-      <div class="header">
-        <button onclick="goBack()">← Back</button>
-        <div class="title" id="gameTitle">🃏 21点 Blackjack</div>
-        <div class="info">
-          <span class="name" id="playerNameDisplay"></span>
-          <span class="balance">💰 <span id="balanceDisplay">100</span></span>
-        </div>
-      </div>
-      
-      <div class="table">
-        <!-- Dealer -->
-        <div class="dealer-area">
-          <div class="label">🎰 Dealer</div>
-          <div class="cards" id="dealerCards"></div>
-          <div class="score" id="dealerScore"></div>
-        </div>
-        
-        <!-- Message -->
-        <div class="message" id="gameMessage"></div>
-        
-        <!-- Player -->
-        <div class="player-area">
-          <div class="label">👤 You</div>
-          <div class="cards" id="playerCards"></div>
-          <div class="score" id="playerScore"></div>
-          <div class="bet-info" id="betInfo"></div>
-        </div>
-        
-        <!-- Betting -->
-        <div class="bet-section" id="betSection">
-          <input type="number" id="betAmount" placeholder="Bet" value="10" min="1" />
-          <button onclick="placeBet()">💰 Place Bet</button>
-        </div>
-        
-        <!-- Controls -->
-        <div class="controls" id="gameControls" style="display:none;">
-          <button class="btn-hit" onclick="hit()">🖐️ Hit</button>
-          <button class="btn-stand" onclick="stand()">✋ Stand</button>
-          <button class="btn-double" onclick="doubleDown()">✌️ Double</button>
-        </div>
-        
-        <!-- Next Round -->
-        <div class="controls" id="nextRoundControls" style="display:none;">
-          <button class="btn-new" onclick="nextRound()">🎮 Next Round</button>
-        </div>
-        
-        <!-- Other Players -->
-        <div class="other-players" id="otherPlayers"></div>
-      </div>
-      
-      <!-- Admin -->
-      <div class="admin-panel">
-        👑 <input type="password" id="adminPassword" placeholder="Admin" />
-        <button onclick="setAdmin()">Set</button>
-        <button onclick="resetAll()">Reset All</button>
-      </div>
+    <div class="controls">
+      <button id="dealToAllBtn" class="btn-success">🎯 Deal to All</button>
+      <button id="dealToCenterBtn" class="btn-secondary">📤 Deal to Table</button>
+      <button id="clearCenterBtn" class="btn-danger">🗑️ Clear Table</button>
+    </div>
+
+    <div class="players-section">
+      <h2>Players</h2>
+      <div class="players-list" id="playersList"></div>
     </div>
   </div>
+
+  <!-- Debug Overlay -->
+  <div class="overlay" id="debugOverlay"></div>
   
-  <div class="fortune">🧧 恭喜发财</div>
+  <!-- Debug Panel -->
+  <div class="debug-panel" id="debugPanel">
+    <button class="close-btn" onclick="closeDebug()">×</button>
+    <h3>🔍 Deck Sequence (Top to Bottom)</h3>
+    <div class="debug-grid" id="debugGrid"></div>
+  </div>
+
+  <!-- Fortune -->
+  <div class="fortune" id="fortune">🧧 恭喜发财 🧧</div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    let selectedGame = 'blackjack';
-    let myId = null;
-    let myBalance = 100;
+    // Fortune rotation
+    const fortunes = ['🧧 恭喜发财 🐲','🐲 新年快乐 🎊','🧧 步步高升 💰','🎊 万事如意 🧧','🧧 财源广进 🎉'];
+    let fortuneIndex = 0;
+    setInterval(() => {
+      fortuneIndex = (fortuneIndex + 1) % fortunes.length;
+      document.getElementById('fortune').textContent = fortunes[fortuneIndex];
+    }, 4000);
     
-    function selectGame(game) {
-      selectedGame = game;
-      document.querySelectorAll('.game-card').forEach(c => c.classList.remove('selected'));
-      document.querySelector(`[onclick="selectGame('${game}')"]`).classList.add('selected');
-    }
+    // =======================================================================
+    // GAME MODE
+    // =======================================================================
+    let currentGameMode = 'freeDeal';
     
-    function joinGame() {
-      const name = document.getElementById('playerName').value.trim();
-      if (!name) { alert('Enter your name'); return; }
+    function setGameMode() {
+      const mode = document.querySelector('input[name="gameMode"]:checked').value;
+      currentGameMode = mode;
+      socket.emit('setGameMode', mode);
       
-      socket.emit('joinGame', { name, game: selectedGame });
-      
-      document.getElementById('welcomeScreen').style.display = 'none';
-      document.getElementById('gameScreen').style.display = 'block';
-      document.getElementById('playerNameDisplay').textContent = name;
-    }
-    
-    function goBack() {
-      if (confirm('Leave game?')) {
-        location.reload();
+      // Show/hide relevant controls
+      if (mode === 'blackjack') {
+        // Hide free deal controls
+        if (elements.shuffleBtn) elements.shuffleBtn.style.display = 'none';
+        if (elements.dealToAllBtn) elements.dealToAllBtn.style.display = 'none';
+        if (elements.dealToCenterBtn) elements.dealToCenterBtn.style.display = 'none';
+        if (elements.clearCenterBtn) elements.clearCenterBtn.style.display = 'none';
+      } else {
+        // Show free deal controls
+        if (elements.shuffleBtn) elements.shuffleBtn.style.display = 'inline-block';
+        if (elements.dealToAllBtn) elements.dealToAllBtn.style.display = 'inline-block';
+        if (elements.dealToCenterBtn) elements.dealToCenterBtn.style.display = 'inline-block';
+        if (elements.clearCenterBtn) elements.clearCenterBtn.style.display = 'inline-block';
       }
     }
     
-    function placeBet() {
-      const bet = parseInt(document.getElementById('betAmount').value);
-      if (isNaN(bet) || bet < 1) { alert('Invalid bet'); return; }
-      socket.emit('placeBet', { bet });
-    }
-    
-    function hit() { socket.emit('hit'); }
-    function stand() { socket.emit('stand'); }
-    function doubleDown() { socket.emit('double'); }
-    function nextRound() { socket.emit('nextRound'); }
-    
-    function setAdmin() {
-      const pw = document.getElementById('adminPassword').value;
-      socket.emit('setAdmin', { password: pw });
-    }
-    function resetAll() {
-      if (confirm('Reset all players to 100?')) {
-        socket.emit('adminReset');
-      }
-    }
-    
+    // =======================================================================
+    // SOCKET CONNECTION
+    // =======================================================================
     const socket = io();
-    socket.on('connect', () => { myId = socket.id; });
-    
-    socket.on('balanceUpdate', (balance) => {
-      myBalance = balance;
-      document.getElementById('balanceDisplay').textContent = balance;
+
+    // =======================================================================
+    // DOM ELEMENTS
+    // =======================================================================
+    const elements = {
+      playerName: document.getElementById('playerName'),
+      joinBtn: document.getElementById('joinBtn'),
+      adminPassword: document.getElementById('adminPassword'),
+      adminBtn: document.getElementById('adminBtn'),
+      shuffleBtn: document.getElementById('shuffleBtn'),
+      resetBtn: document.getElementById('resetBtn'),
+      dealToAllBtn: document.getElementById('dealToAllBtn'),
+      dealToCenterBtn: document.getElementById('dealToCenterBtn'),
+      clearCenterBtn: document.getElementById('clearCenterBtn'),
+      debugDeckBtn: document.getElementById('debugDeckBtn'),
+      deckCount: document.getElementById('deckCount'),
+      playersAroundTable: document.getElementById('playersAroundTable'),
+      tableCenter: document.getElementById('tableCenter'),
+      playersList: document.getElementById('playersList'),
+      debugPanel: document.getElementById('debugPanel'),
+      debugOverlay: document.getElementById('debugOverlay'),
+      debugGrid: document.getElementById('debugGrid')
+    };
+
+    // =======================================================================
+    // EVENT LISTENERS
+    // =======================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // Join game
+      elements.playerName.addEventListener('keypress', (e) => { 
+        if (e.key === 'Enter') elements.joinBtn.click(); 
+      });
+      elements.joinBtn.addEventListener('click', () => {
+        const name = elements.playerName.value.trim();
+        if (!name) { alert('Please enter your name'); return; }
+        socket.emit('join', name);
+        elements.playerName.disabled = true;
+        elements.joinBtn.disabled = true;
+        elements.joinBtn.textContent = 'Joined!';
+      });
+
+      // Admin login
+      elements.adminPassword.addEventListener('keypress', (e) => { 
+        if (e.key === 'Enter') elements.adminBtn.click(); 
+      });
+      elements.adminBtn.addEventListener('click', () => {
+        const password = elements.adminPassword.value;
+        if (!password) { alert('Enter password'); return; }
+        socket.emit('setAdminPassword', password);
+      });
+
+      // Admin controls
+      elements.shuffleBtn.addEventListener('click', () => { socket.emit('shuffle'); });
+      elements.resetBtn.addEventListener('click', () => { resetGame(); });
+      elements.dealToCenterBtn.addEventListener('click', () => { socket.emit('dealToCenter'); });
+      elements.dealToAllBtn.addEventListener('click', () => { socket.emit('dealToAll'); });
+      elements.clearCenterBtn.addEventListener('click', () => { socket.emit('clearCenter'); });
+      
+      // DEBUG: Show deck sequence
+      elements.debugDeckBtn.addEventListener('click', () => { 
+        socket.emit('debugShowDeck'); 
+      });
+
+      // Close debug panel
+      elements.debugOverlay.addEventListener('click', closeDebug);
     });
+
+    // =======================================================================
+    // SOCKET EVENT HANDLERS
+    // =======================================================================
     
-    socket.on('gameState', (state) => { render(state); });
-    socket.on('error', (msg) => { alert(msg); });
-    
-    function render(state) {
-      // Dealer
-      const dealerHtml = state.dealerCards.map((c, i) => {
-        if (i === 0 && state.phase !== 'settled' && state.phase !== 'dealerTurn') {
-          return '<div class="card back"></div>';
-        }
-        return renderCard(c);
-      }).join('');
-      document.getElementById('dealerCards').innerHTML = dealerHtml;
+    // Update game state
+    socket.on('updateGame', (gameState) => { 
+      renderGame(gameState);
       
-      const dealerScore = state.phase === 'settled' || state.phase === 'dealerTurn' 
-        ? state.dealerScore : '?';
-      document.getElementById('dealerScore').textContent = dealerScore !== '?' 
-        ? `Score: ${dealerScore}` : '';
-      
-      // My player
-      const me = state.players[myId];
-      if (me) {
-        myBalance = me.balance;
-        document.getElementById('balanceDisplay').textContent = me.balance;
-        
-        const playerHtml = me.cards.map(c => renderCard(c)).join('');
-        document.getElementById('playerCards').innerHTML = playerHtml;
-        document.getElementById('playerScore').textContent = me.cards.length > 0 
-          ? `Score: ${me.score}` : '';
-        
-        document.getElementById('betInfo').textContent = me.bet > 0 ? `Bet: ${me.bet}` : '';
+      // Check if current user is in players list - if not, reset join button
+      const myPlayer = gameState.players.find(p => p.id === socket.id);
+      if (!myPlayer) {
+        elements.playerName.disabled = false;
+        elements.joinBtn.disabled = false;
+        elements.joinBtn.textContent = 'Join Table';
       }
       
-      // Sections
-      const betSection = document.getElementById('betSection');
-      const controls = document.getElementById('gameControls');
-      const nextControls = document.getElementById('nextRoundControls');
-      const msg = document.getElementById('gameMessage');
+      // Show/hide admin controls based on admin status
+      const isAdmin = gameState.adminId && socket.id === gameState.adminId;
+      const controls = [
+        elements.dealToAllBtn,
+        elements.dealToCenterBtn,
+        elements.clearCenterBtn,
+        elements.shuffleBtn,
+        elements.resetBtn,
+        elements.debugDeckBtn
+      ];
       
-      msg.style.display = 'none';
-      
-      if (state.phase === 'betting') {
-        betSection.style.display = 'block';
-        controls.style.display = 'none';
-        nextControls.style.display = 'none';
-        
-        if (me && me.bet > 0) {
-          msg.style.display = 'block';
-          msg.className = 'message waiting';
-          msg.textContent = 'Waiting for other players...';
-        }
-      } else if (state.phase === 'playerTurn' || state.phase === 'dealing') {
-        betSection.style.display = 'none';
-        controls.style.display = 'flex';
-        nextControls.style.display = 'none';
-        
-        const canDouble = me && me.cards.length === 2 && me.balance >= (me.bet || 0);
-        controls.querySelector('.btn-double').disabled = !canDouble;
-        
-        if (state.currentPlayerId === myId) {
-          msg.style.display = 'block';
-          msg.className = 'message waiting';
-          msg.textContent = "🎯 Your turn!";
-        }
-      } else if (state.phase === 'settled') {
-        betSection.style.display = 'none';
-        controls.style.display = 'none';
-        nextControls.style.display = 'flex';
-        
-        if (me && me.result) {
-          msg.style.display = 'block';
-          if (me.result === 'blackjack') {
-            msg.className = 'message blackjack';
-            msg.textContent = '🎉 BLACKJACK!';
-          } else if (me.result === 'win') {
-            msg.className = 'message win';
-            msg.textContent = '🎊 You Win!';
-          } else if (me.result === 'lose') {
-            msg.className = 'message lose';
-            msg.textContent = '💀 Dealer Wins';
-          } else if (me.result === 'push') {
-            msg.className = 'message push';
-            msg.textContent = '⚖️ Push';
-          } else if (me.result === 'bust') {
-            msg.className = 'message lose';
-            msg.textContent = '💥 BUST!';
-          }
-        }
-      }
-      
-      // Other players
-      let html = '';
-      for (const id in state.players) {
-        if (id === myId) continue;
-        const p = state.players[id];
-        const isActive = id === state.currentPlayerId;
-        
-        html += `<div class="other-player ${isActive ? 'active' : ''}">`;
-        html += `<div class="name">${p.name}</div>`;
-        
-        if (p.cards.length > 0) {
-          html += '<div class="cards">' + p.cards.map(c => renderCard(c)).join('') + '</div>';
-          html += `<div class="score">${p.score}</div>`;
-        } else {
-          html += '<div class="cards"><span style="color:#666;font-size:0.6rem">Waiting...</span></div>';
-        }
-        html += '</div>';
-      }
-      document.getElementById('otherPlayers').innerHTML = html;
-    }
-    
+      controls.forEach(ctrl => {
+        ctrl.style.display = isAdmin ? 'inline-block' : 'none';
+      });
+    });
+
+    // Error messages
+    socket.on('error', (msg) => { 
+      alert(msg); 
+    });
+
+    // DEBUG: Receive deck sequence
+    socket.on('debugDeck', (deck) => {
+      showDebugDeck(deck);
+    });
+
+    // =======================================================================
+    // RENDER FUNCTIONS
+    // =======================================================================
+
     function renderCard(card) {
-      const color = (card.suit === '♥' || card.suit === '♦') ? 'red' : 'black';
-      return `<div class="card ${color}">
-        <div class="value">${card.value}</div>
-        <div class="suit">${card.suit}</div>
-      </div>`;
+      if (!card) return '<div class="card back"></div>';
+      return '<div class="card ' + card.color + '">' + card.value + card.suit + '</div>';
     }
+
+    function renderGame(gameState) {
+      const isAdmin = gameState.adminId && socket.id === gameState.adminId;
+      elements.deckCount.textContent = gameState.deck.length;
+
+      // Render players around table
+      if (gameState.players.length === 0) {
+        elements.playersAroundTable.innerHTML = '<p style="color:#86efac;font-size:0.9rem">Join to play!</p>';
+      } else {
+        elements.playersAroundTable.innerHTML = gameState.players.map(player => {
+          return '<div class="table-player"><div class="name">' + player.name + '</div></div>';
+        }).join('');
+      }
+
+      // Render center cards
+      if (gameState.centerCards.length === 0) {
+        elements.tableCenter.innerHTML = '<p style="color:#86efac;font-size:0.8rem">Cards dealt to table</p>';
+      } else {
+        elements.tableCenter.innerHTML = gameState.centerCards.map((card, idx) => 
+          '<div class="card ' + card.color + '" onclick="returnToDeck(' + idx + ')">' + card.value + card.suit + '</div>'
+        ).join('');
+      }
+
+      // Render player list
+      if (gameState.players.length === 0) {
+        elements.playersList.innerHTML = '<p style="color:#9ca3af">No players yet. Join below!</p>';
+      } else {
+        elements.playersList.innerHTML = gameState.players.map(player => {
+          const isMe = player.id === socket.id;
+          const balance = player.balance || 0;
+          const cardsHtml = player.cards.length > 0
+            ? player.cards.map(c => renderCard(c)).join('')
+            : '<span style="color:#6b7280;font-size:0.75rem">No cards</span>';
+            
+          return '<div class="player-card ' + (isMe ? 'is-me' : '') + '">' +
+            '<div class="name">' + player.name + 
+            (player.id === gameState.adminId ? ' 👑' : '') + 
+            (isMe ? ' 👈' : '') + 
+            '</div>' +
+            '<div class="balance">💰 ' + balance + '</div>' +
+            '<div class="cards">' + cardsHtml + '</div>' +
+            (isAdmin ? '<button class="deal-to-btn" onclick="dealToPlayer(\'' + player.id + '\')">Deal 1</button>' : '') +
+            // Balance buttons - player can update own, admin can update anyone
+            ((isAdmin || isMe) ? '<button class="bal-btn" onclick="updateBalance(\'' + player.id + '\',1)">+1</button>' : '') +
+            ((isAdmin || isMe) ? '<button class="bal-btn" onclick="updateBalance(\'' + player.id + '\',5)">+5</button>' : '') +
+            ((isAdmin || isMe) ? '<button class="bal-btn" onclick="updateBalance(\'' + player.id + '\',10)">+10</button>' : '') +
+            ((isAdmin || isMe) ? '<button class="bal-btn minus" onclick="updateBalance(\'' + player.id + '\',-1)">-1</button>' : '') +
+            ((isAdmin || isMe) ? '<button class="bal-btn minus" onclick="updateBalance(\'' + player.id + '\',-5)">-5</button>' : '') +
+            ((isAdmin || isMe) ? '<button class="bal-btn minus" onclick="updateBalance(\'' + player.id + '\',-10)">-10</button>' : '') +
+            (isAdmin ? '<button class="remove-btn" onclick="removePlayer(\'' + player.id + '\')">Remove</button>' : '') +
+            '</div>';
+        }).join('');
+      }
+    }
+
+    // =======================================================================
+    // DEBUG FUNCTIONS
+    // =======================================================================
+    
+    function showDebugDeck(deck) {
+      elements.debugGrid.innerHTML = deck.map(card => 
+        '<div class="debug-card ' + card.color + '">' +
+        '<div class="idx">#' + card.index + '</div>' +
+        card.value + card.suit +
+        '</div>'
+      ).join('');
+      
+      elements.debugPanel.classList.add('visible');
+      elements.debugOverlay.classList.add('visible');
+    }
+
+    function closeDebug() {
+      elements.debugPanel.classList.remove('visible');
+      elements.debugOverlay.classList.remove('visible');
+    }
+
+    // =======================================================================
+    // PLAYER ACTIONS
+    // =======================================================================
+    
+    function dealToPlayer(playerId) { socket.emit('dealToPlayer', playerId); }
+    function removePlayer(playerId) { socket.emit('removePlayer', playerId); }
+    function updateBalance(playerId, amount) { socket.emit('updateBalance', { playerId, amount }); }
+    function resetGame() { 
+      if(confirm('Reset game? All players will be removed.')){ 
+        socket.emit('resetGame'); 
+      } 
+    }
+    function returnToDeck(cardIndex) { socket.emit('returnCardToDeck', cardIndex); }
   </script>
 </body>
 </html>
