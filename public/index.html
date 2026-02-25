@@ -774,18 +774,28 @@
         }
       }
 
-      // Other players
-      let html = '';
+      // All players at table (show everyone)
+      let html = '<div style="margin-top:15px;padding-top:15px;border-top:1px solid rgba(255,255,255,0.2);"><div style="text-align:center;color:#aaa;font-size:0.8rem;margin-bottom:10px;">🎴 ALL PLAYERS</div><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">';
+      
       for (const p of state.players) {
-        if (p.id === myId) continue;
+        if (p.id === myId) continue; // Skip self (already shown above)
+        
         const pbs = bj.players[p.id];
         const isActive = p.id === bj.currentPlayerId;
-        html += `<div class="bj-other-player ${isActive ? 'active' : ''}">`;
-        html += `<div style="font-size:0.8rem;color:#aaa;">${p.name}</div>`;
+        const hasBet = pbs && pbs.bet > 0;
+        
+        html += `<div class="bj-other-player ${isActive ? 'active' : ''}" style="${hasBet ? 'border:2px solid #FFD700;' : 'opacity:0.6;'}">`;
+        html += `<div style="font-size:0.85rem;font-weight:bold;color:${isActive ? '#00d9ff' : '#fff'};">${p.name} ${isActive ? '🎯' : ''}</div>`;
+        
         if (p.cards && p.cards.length > 0) {
-          html += '<div style="display:flex;gap:3px;justify-content:center;margin:5px 0;">';
-          html += p.cards.map(c => `<div class="bj-card" style="width:30px;height:42px;font-size:0.6rem;">${c.value}<br>${c.suit}</div>`).join('');
+          html += '<div style="display:flex;gap:2px;justify-content:center;margin:5px 0;">';
+          html += p.cards.map(c => {
+            const color = (c.suit === '♥' || c.suit === '♦') ? 'red' : 'black';
+            return `<div style="width:28px;height:38px;background:white;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:bold;color:${color};">${c.value}</div>`;
+          }).join('');
           html += '</div>';
+          
+          // Calculate score
           let score = 0, aces = 0;
           for (const c of p.cards) {
             if (['J','Q','K'].includes(c.value)) score += 10;
@@ -793,12 +803,31 @@
             else score += parseInt(c.value);
           }
           while (score > 21 && aces > 0) { score -= 10; aces--; }
-          html += `<div style="font-size:0.85rem;">${score}</div>`;
+          
+          // Show result if settled
+          if (bj.phase === 'settled' && pbs) {
+            if (pbs.result === 'blackjack') html += `<div style="font-size:0.7rem;color:#FFD700;">BLACKJACK!</div>`;
+            else if (pbs.result === 'win') html += `<div style="font-size:0.7rem;color:#22c55e;">WIN</div>`;
+            else if (pbs.result === 'lose') html += `<div style="font-size:0.7rem;color:#ef4444;">LOSE</div>`;
+            else if (pbs.result === 'push') html += `<div style="font-size:0.7rem;color:#fff;">PUSH</div>`;
+            else if (pbs.result === 'bust') html += `<div style="font-size:0.7rem;color:#ef4444;">BUST</div>`;
+            else html += `<div style="font-size:0.85rem;">${score}</div>`;
+          } else {
+            html += `<div style="font-size:0.85rem;">${score}</div>`;
+          }
+        } else if (hasBet) {
+          html += '<div style="color:#666;font-size:0.6rem;">Playing...</div>';
         } else {
-          html += '<div style="color:#666;font-size:0.6rem;margin:5px 0;">Waiting...</div>';
+          html += '<div style="color:#666;font-size:0.6rem;">No bet</div>';
         }
+        
+        if (pbs && pbs.bet > 0) {
+          html += `<div style="color:#f59e0b;font-size:0.75rem;">$${pbs.bet}</div>`;
+        }
+        
         html += '</div>';
       }
+      html += '</div></div>';
       document.getElementById('bjOtherPlayers').innerHTML = html;
     }
 
