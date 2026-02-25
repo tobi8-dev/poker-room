@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🃏 21点 Blackjack</title>
+  <title>🐲 CNY Card Games</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+      background: linear-gradient(135deg, #8B0000 0%, #D4AF37 50%, #8B0000 100%);
       min-height: 100vh;
       color: white;
       padding: 15px;
@@ -16,9 +16,53 @@
     .container { max-width: 900px; margin: 0 auto; }
     
     /* Welcome Screen */
-    #welcomeScreen { display: block; text-align: center; padding: 60px 20px; }
-    #welcomeScreen h1 { font-size: 3rem; margin-bottom: 10px; }
-    #welcomeScreen .subtitle { font-size: 1.3rem; color: #ffd700; margin-bottom: 40px; }
+    #welcomeScreen { 
+      display: block; 
+      text-align: center; 
+      padding: 60px 20px; 
+    }
+    #welcomeScreen h1 { 
+      font-size: 3rem; 
+      margin-bottom: 10px; 
+    }
+    #welcomeScreen .subtitle { 
+      font-size: 1.3rem; 
+      color: #ffd700; 
+      margin-bottom: 40px; 
+    }
+    .game-cards {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .game-card {
+      background: rgba(0,0,0,0.5);
+      border: 3px solid #ffd700;
+      border-radius: 16px;
+      padding: 30px;
+      cursor: pointer;
+      transition: all 0.3s;
+      width: 200px;
+    }
+    .game-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .game-card.selected {
+      border-color: #00d9ff;
+      background: rgba(0,217,255,0.2);
+    }
+    .game-card .icon { font-size: 3rem; margin-bottom: 10px; }
+    .game-card .name { font-size: 1.3rem; font-weight: bold; color: #ffd700; }
+    .game-card .desc { font-size: 0.85rem; color: #ccc; margin-top: 8px; }
+    .game-card .coming { 
+      font-size: 0.75rem; 
+      color: #ef4444; 
+      margin-top: 10px;
+    }
+    
     #welcomeScreen input {
       padding: 15px 20px;
       border-radius: 10px;
@@ -55,6 +99,14 @@
     .header .info { display: flex; gap: 20px; align-items: center; }
     .header .name { color: #00d9ff; }
     .header .balance { color: #22c55e; font-weight: bold; }
+    .header button {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: none;
+      background: #6b7280;
+      color: white;
+      cursor: pointer;
+    }
     
     .table {
       background: linear-gradient(180deg, #1e3a5f 0%, #0d2137 100%);
@@ -62,7 +114,7 @@
       padding: 30px;
       margin: 20px 0;
       border: 4px solid #ffd700;
-      min-height: 400px;
+      min-height: 350px;
     }
     
     .dealer-area { text-align: center; margin-bottom: 30px; }
@@ -77,8 +129,8 @@
     .player-area .bet-info { font-size: 1rem; color: #f59e0b; margin-top: 5px; }
     
     .card {
-      width: 80px;
-      height: 115px;
+      width: 70px;
+      height: 100px;
       background: white;
       border-radius: 8px;
       display: flex;
@@ -86,18 +138,17 @@
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 1.5rem;
-      box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
-      animation: slideUp 0.3s ease-out;
+      font-size: 1.3rem;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.5);
     }
     .card.red { color: #dc2626; }
     .card.black { color: #1f2937; }
     .card.back {
       background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #7c3aed 100%);
-      border: 3px solid #e9d5ff;
+      border: 2px solid #e9d5ff;
     }
-    .card .suit { font-size: 2.2rem; }
-    .card .value { font-size: 1.3rem; }
+    .card .suit { font-size: 1.8rem; }
+    .card .value { font-size: 1.1rem; }
     
     .controls {
       display: flex;
@@ -107,16 +158,14 @@
       flex-wrap: wrap;
     }
     .controls button {
-      padding: 14px 30px;
-      border-radius: 10px;
+      padding: 12px 25px;
+      border-radius: 8px;
       border: none;
       cursor: pointer;
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: bold;
-      transition: transform 0.1s;
     }
-    .controls button:hover { transform: translateY(-3px); }
-    .controls button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .controls button:hover { transform: translateY(-2px); }
     .btn-hit { background: #22c55e; color: white; }
     .btn-stand { background: #ef4444; color: white; }
     .btn-double { background: #f59e0b; color: #000; }
@@ -125,96 +174,87 @@
     .bet-section {
       text-align: center;
       margin: 20px 0;
-      padding: 20px;
+      padding: 15px;
       background: rgba(0,0,0,0.3);
       border-radius: 10px;
     }
     .bet-section input {
-      padding: 12px 20px;
-      border-radius: 8px;
+      padding: 10px 15px;
+      border-radius: 6px;
       border: 2px solid #ffd700;
-      font-size: 1.1rem;
-      width: 100px;
+      font-size: 1rem;
+      width: 80px;
       text-align: center;
     }
     .bet-section button {
-      padding: 12px 25px;
-      border-radius: 8px;
+      padding: 10px 20px;
+      border-radius: 6px;
       border: none;
-      font-size: 1rem;
+      font-size: 0.9rem;
       font-weight: bold;
       background: #ffd700;
       color: #000;
       cursor: pointer;
-      margin-left: 10px;
+      margin-left: 8px;
     }
     
     .message {
       text-align: center;
-      font-size: 1.8rem;
+      font-size: 1.5rem;
       font-weight: bold;
-      margin: 20px 0;
-      padding: 15px;
-      border-radius: 10px;
-      animation: slideUp 0.3s ease-out;
+      margin: 15px 0;
+      padding: 12px;
+      border-radius: 8px;
     }
     .message.win { background: rgba(34,197,94,0.3); color: #22c55e; }
     .message.lose { background: rgba(239,68,68,0.3); color: #ef4444; }
     .message.push { background: rgba(255,255,255,0.2); }
     .message.blackjack { background: rgba(255,215,0,0.3); color: #ffd700; }
-    .message.bust { background: rgba(239,68,68,0.3); color: #ef4444; }
-    .message.waiting { background: rgba(255,255,255,0.1); font-size: 1.2rem; }
+    .message.waiting { background: rgba(255,255,255,0.1); font-size: 1rem; }
     
     .other-players {
       display: flex;
-      gap: 15px;
+      gap: 10px;
       justify-content: center;
       flex-wrap: wrap;
-      margin-top: 20px;
-      padding-top: 20px;
+      margin-top: 15px;
+      padding-top: 15px;
       border-top: 1px solid rgba(255,255,255,0.2);
     }
     .other-player {
       background: rgba(0,0,0,0.4);
-      padding: 10px 15px;
-      border-radius: 10px;
+      padding: 8px 12px;
+      border-radius: 8px;
       text-align: center;
-      min-width: 100px;
+      min-width: 80px;
     }
-    .other-player .name { font-size: 0.9rem; color: #aaa; }
-    .other-player .cards { display: flex; gap: 5px; justify-content: center; margin: 5px 0; }
-    .other-player .card { width: 35px; height: 50px; font-size: 0.7rem; }
-    .other-player .score { font-size: 0.85rem; }
+    .other-player .name { font-size: 0.8rem; color: #aaa; }
+    .other-player .cards { display: flex; gap: 3px; justify-content: center; margin: 5px 0; }
+    .other-player .card { width: 30px; height: 42px; font-size: 0.6rem; }
     .other-player.active { border: 2px solid #00d9ff; }
-    .other-player.waiting { opacity: 0.5; }
     
     .admin-panel {
       background: rgba(0,0,0,0.5);
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 15px;
       text-align: center;
     }
     .admin-panel input {
-      padding: 8px 12px;
-      border-radius: 6px;
+      padding: 6px 10px;
+      border-radius: 4px;
       border: 1px solid #ffd700;
       background: white;
-      width: 100px;
+      width: 80px;
     }
     .admin-panel button {
-      padding: 8px 14px;
-      border-radius: 6px;
+      padding: 6px 12px;
+      border-radius: 4px;
       border: none;
       cursor: pointer;
       background: #ffd700;
       color: #000;
       margin-left: 5px;
-    }
-    
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
     }
     
     .fortune {
@@ -229,108 +269,133 @@
   </style>
 </head>
 <body>
-  <!-- Welcome Screen -->
-  <div id="welcomeScreen">
-    <h1>🃏 21点 Blackjack</h1>
-    <p class="subtitle">Classic Casino Blackjack</p>
-    <input type="text" id="playerName" placeholder="Enter your name" />
-    <button onclick="joinGame()">🎮 Join Table</button>
-  </div>
+  <div class="container">
+    
+    <!-- Welcome Screen -->
+    <div id="welcomeScreen">
+      <h1>🐲 新年快乐 🧧</h1>
+      <p class="subtitle">Choose Your Game</p>
+      
+      <div class="game-cards">
+        <div class="game-card selected" onclick="selectGame('blackjack')">
+          <div class="icon">🃏</div>
+          <div class="name">21点</div>
+          <div class="desc">Classic Blackjack</div>
+        </div>
+        <div class="game-card" onclick="selectGame('poker')">
+          <div class="icon">🃴</div>
+          <div class="name">德州扑克</div>
+          <div class="coming">Coming Soon</div>
+        </div>
+      </div>
+      
+      <input type="text" id="playerName" placeholder="Enter your name" />
+      <button onclick="joinGame()">🎮 Play Now</button>
+    </div>
 
-  <!-- Game Screen -->
-  <div id="gameScreen">
-    <div class="header">
-      <div class="title">🃏 21点 Blackjack</div>
-      <div class="info">
-        <span class="name" id="playerNameDisplay"></span>
-        <span class="balance">💰 <span id="balanceDisplay">100</span></span>
-      </div>
-    </div>
-    
-    <div class="table">
-      <!-- Dealer -->
-      <div class="dealer-area">
-        <div class="label">🎰 Dealer</div>
-        <div class="cards" id="dealerCards"></div>
-        <div class="score" id="dealerScore"></div>
+    <!-- Game Screen -->
+    <div id="gameScreen">
+      <div class="header">
+        <button onclick="goBack()">← Back</button>
+        <div class="title" id="gameTitle">🃏 21点 Blackjack</div>
+        <div class="info">
+          <span class="name" id="playerNameDisplay"></span>
+          <span class="balance">💰 <span id="balanceDisplay">100</span></span>
+        </div>
       </div>
       
-      <!-- Message -->
-      <div class="message" id="gameMessage"></div>
-      
-      <!-- Player -->
-      <div class="player-area">
-        <div class="label">👤 You</div>
-        <div class="cards" id="playerCards"></div>
-        <div class="score" id="playerScore"></div>
-        <div class="bet-info" id="betInfo"></div>
+      <div class="table">
+        <!-- Dealer -->
+        <div class="dealer-area">
+          <div class="label">🎰 Dealer</div>
+          <div class="cards" id="dealerCards"></div>
+          <div class="score" id="dealerScore"></div>
+        </div>
+        
+        <!-- Message -->
+        <div class="message" id="gameMessage"></div>
+        
+        <!-- Player -->
+        <div class="player-area">
+          <div class="label">👤 You</div>
+          <div class="cards" id="playerCards"></div>
+          <div class="score" id="playerScore"></div>
+          <div class="bet-info" id="betInfo"></div>
+        </div>
+        
+        <!-- Betting -->
+        <div class="bet-section" id="betSection">
+          <input type="number" id="betAmount" placeholder="Bet" value="10" min="1" />
+          <button onclick="placeBet()">💰 Place Bet</button>
+        </div>
+        
+        <!-- Controls -->
+        <div class="controls" id="gameControls" style="display:none;">
+          <button class="btn-hit" onclick="hit()">🖐️ Hit</button>
+          <button class="btn-stand" onclick="stand()">✋ Stand</button>
+          <button class="btn-double" onclick="doubleDown()">✌️ Double</button>
+        </div>
+        
+        <!-- Next Round -->
+        <div class="controls" id="nextRoundControls" style="display:none;">
+          <button class="btn-new" onclick="nextRound()">🎮 Next Round</button>
+        </div>
+        
+        <!-- Other Players -->
+        <div class="other-players" id="otherPlayers"></div>
       </div>
       
-      <!-- Betting -->
-      <div class="bet-section" id="betSection">
-        <input type="number" id="betAmount" placeholder="Bet" value="10" min="1" />
-        <button onclick="placeBet()">💰 Place Bet</button>
+      <!-- Admin -->
+      <div class="admin-panel">
+        👑 <input type="password" id="adminPassword" placeholder="Admin" />
+        <button onclick="setAdmin()">Set</button>
+        <button onclick="resetAll()">Reset All</button>
       </div>
-      
-      <!-- Controls -->
-      <div class="controls" id="gameControls" style="display:none;">
-        <button class="btn-hit" onclick="hit()">🖐️ Hit</button>
-        <button class="btn-stand" onclick="stand()">✋ Stand</button>
-        <button class="btn-double" onclick="doubleDown()">✌️ Double</button>
-      </div>
-      
-      <!-- Next Round -->
-      <div class="controls" id="nextRoundControls" style="display:none;">
-        <button class="btn-new" onclick="nextRound()">🎮 Next Round</button>
-      </div>
-      
-      <!-- Other Players -->
-      <div class="other-players" id="otherPlayers"></div>
-    </div>
-    
-    <!-- Admin -->
-    <div class="admin-panel">
-      👑 <input type="password" id="adminPassword" placeholder="Admin" />
-      <button onclick="setAdmin()">Set</button>
-      <button onclick="resetAll()">Reset All</button>
     </div>
   </div>
   
-  <div class="fortune">🧧 Good Luck!</div>
+  <div class="fortune">🧧 恭喜发财</div>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    const socket = io();
+    let selectedGame = 'blackjack';
     let myId = null;
     let myBalance = 100;
-    let gameState = null;
     
-    // Join game
+    function selectGame(game) {
+      selectedGame = game;
+      document.querySelectorAll('.game-card').forEach(c => c.classList.remove('selected'));
+      document.querySelector(`[onclick="selectGame('${game}')"]`).classList.add('selected');
+    }
+    
     function joinGame() {
       const name = document.getElementById('playerName').value.trim();
       if (!name) { alert('Enter your name'); return; }
       
-      socket.emit('joinGame', { name });
+      socket.emit('joinGame', { name, game: selectedGame });
       
       document.getElementById('welcomeScreen').style.display = 'none';
       document.getElementById('gameScreen').style.display = 'block';
       document.getElementById('playerNameDisplay').textContent = name;
     }
     
-    // Place bet
+    function goBack() {
+      if (confirm('Leave game?')) {
+        location.reload();
+      }
+    }
+    
     function placeBet() {
       const bet = parseInt(document.getElementById('betAmount').value);
       if (isNaN(bet) || bet < 1) { alert('Invalid bet'); return; }
       socket.emit('placeBet', { bet });
     }
     
-    // Game actions
     function hit() { socket.emit('hit'); }
     function stand() { socket.emit('stand'); }
     function doubleDown() { socket.emit('double'); }
     function nextRound() { socket.emit('nextRound'); }
     
-    // Admin
     function setAdmin() {
       const pw = document.getElementById('adminPassword').value;
       socket.emit('setAdmin', { password: pw });
@@ -341,7 +406,7 @@
       }
     }
     
-    // Socket events
+    const socket = io();
     socket.on('connect', () => { myId = socket.id; });
     
     socket.on('balanceUpdate', (balance) => {
@@ -349,14 +414,9 @@
       document.getElementById('balanceDisplay').textContent = balance;
     });
     
-    socket.on('gameState', (state) => {
-      gameState = state;
-      render(state);
-    });
-    
+    socket.on('gameState', (state) => { render(state); });
     socket.on('error', (msg) => { alert(msg); });
     
-    // Render
     function render(state) {
       // Dealer
       const dealerHtml = state.dealerCards.map((c, i) => {
@@ -372,34 +432,26 @@
       document.getElementById('dealerScore').textContent = dealerScore !== '?' 
         ? `Score: ${dealerScore}` : '';
       
-      // My player data
+      // My player
       const me = state.players[myId];
       if (me) {
-        document.getElementById('playerNameDisplay').textContent = me.name;
         myBalance = me.balance;
         document.getElementById('balanceDisplay').textContent = me.balance;
         
-        // My cards
         const playerHtml = me.cards.map(c => renderCard(c)).join('');
         document.getElementById('playerCards').innerHTML = playerHtml;
         document.getElementById('playerScore').textContent = me.cards.length > 0 
           ? `Score: ${me.score}` : '';
         
-        // Bet info
-        if (me.bet > 0) {
-          document.getElementById('betInfo').textContent = `Bet: ${me.bet}`;
-        } else {
-          document.getElementById('betInfo').textContent = '';
-        }
+        document.getElementById('betInfo').textContent = me.bet > 0 ? `Bet: ${me.bet}` : '';
       }
       
-      // Show/hide sections based on phase
+      // Sections
       const betSection = document.getElementById('betSection');
       const controls = document.getElementById('gameControls');
       const nextControls = document.getElementById('nextRoundControls');
       const msg = document.getElementById('gameMessage');
       
-      // Hide message initially
       msg.style.display = 'none';
       
       if (state.phase === 'betting') {
@@ -417,11 +469,9 @@
         controls.style.display = 'flex';
         nextControls.style.display = 'none';
         
-        // Disable double if not 2 cards or not enough balance
         const canDouble = me && me.cards.length === 2 && me.balance >= (me.bet || 0);
         controls.querySelector('.btn-double').disabled = !canDouble;
         
-        // Highlight if it's my turn
         if (state.currentPlayerId === myId) {
           msg.style.display = 'block';
           msg.className = 'message waiting';
@@ -432,12 +482,11 @@
         controls.style.display = 'none';
         nextControls.style.display = 'flex';
         
-        // Show result
         if (me && me.result) {
           msg.style.display = 'block';
           if (me.result === 'blackjack') {
             msg.className = 'message blackjack';
-            msg.textContent = '🎉 BLACKJACK! 3:2 payout!';
+            msg.textContent = '🎉 BLACKJACK!';
           } else if (me.result === 'win') {
             msg.className = 'message win';
             msg.textContent = '🎊 You Win!';
@@ -446,42 +495,33 @@
             msg.textContent = '💀 Dealer Wins';
           } else if (me.result === 'push') {
             msg.className = 'message push';
-            msg.textContent = '⚖️ Push - Bet returned';
+            msg.textContent = '⚖️ Push';
           } else if (me.result === 'bust') {
-            msg.className = 'message bust';
+            msg.className = 'message lose';
             msg.textContent = '💥 BUST!';
           }
         }
       }
       
       // Other players
-      renderOtherPlayers(state);
-    }
-    
-    function renderOtherPlayers(state) {
-      const container = document.getElementById('otherPlayers');
       let html = '';
-      
       for (const id in state.players) {
         if (id === myId) continue;
-        
         const p = state.players[id];
         const isActive = id === state.currentPlayerId;
         
-        html += `<div class="other-player ${isActive ? 'active' : ''} ${p.bet === 0 ? 'waiting' : ''}">`;
+        html += `<div class="other-player ${isActive ? 'active' : ''}">`;
         html += `<div class="name">${p.name}</div>`;
         
         if (p.cards.length > 0) {
           html += '<div class="cards">' + p.cards.map(c => renderCard(c)).join('') + '</div>';
           html += `<div class="score">${p.score}</div>`;
         } else {
-          html += '<div class="cards"><span style="color:#666">Waiting...</span></div>';
+          html += '<div class="cards"><span style="color:#666;font-size:0.6rem">Waiting...</span></div>';
         }
-        
         html += '</div>';
       }
-      
-      container.innerHTML = html;
+      document.getElementById('otherPlayers').innerHTML = html;
     }
     
     function renderCard(card) {

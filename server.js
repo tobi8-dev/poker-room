@@ -373,7 +373,13 @@ io.on('connection', (socket) => {
     });
 
     // Join game
-    socket.on('joinGame', ({ name }) => {
+    socket.on('joinGame', ({ name, game }) => {
+        // For now, only blackjack is supported
+        if (game && game !== 'blackjack') {
+            socket.emit('error', 'Game not available yet!');
+            return;
+        }
+        
         if (!blackjack.players[socket.id]) {
             blackjack.players[socket.id] = {
                 name: name,
