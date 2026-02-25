@@ -755,18 +755,19 @@
         betSection.style.display = 'block';
         controls.style.display = 'none';
         nextRoundDiv.style.display = 'none';
-        if (bs && bs.bet > 0) {
+        // Always show whose turn it is
+        const currentIdx = state.players.findIndex(p => p.id === state.blackjack.currentPlayerId);
+        const currentPlayer = state.players[currentIdx];
+        if (currentPlayer) {
           msg.style.display = 'block';
           msg.className = 'bj-msg';
           msg.style.background = 'rgba(255,255,255,0.1)';
-          // Find current player index
-          const currentIdx = state.players.findIndex(p => p.id === state.blackjack.currentPlayerId);
-          const currentPlayer = state.players[currentIdx];
-          if (currentPlayer) {
-            msg.textContent = `🎯 Waiting for #${currentIdx + 1} ${currentPlayer.name}...`;
-          } else {
-            msg.textContent = 'Waiting for other players...';
-          }
+          msg.textContent = `🎯 Waiting for #${currentIdx + 1} ${currentPlayer.name}...`;
+        } else if (bs && bs.bet > 0) {
+          msg.style.display = 'block';
+          msg.className = 'bj-msg';
+          msg.style.background = 'rgba(255,255,255,0.1)';
+          msg.textContent = 'Waiting for other players...';
         }
       } else if (bj.phase === 'playing') {
         betSection.style.display = 'none';
