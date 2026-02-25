@@ -167,13 +167,30 @@ const Blackjack = {
         // Check dealer blackjack
         if (this.isBlackjack(state.blackjack.dealerCards)) {
             this.settleRound();
+            broadcastState();
+            return;
         }
         
+        // Check if all players are done (standing or busted)
+        this.checkAllPlayersDone();
+        
         // Set first player
-        const firstPlayer = state.players.find(p => state.blackjack.players[p.id] && !state.blackjack.players[p.id].standing);
+        const firstPlayer = state.players.find(p => state.blackjack.players[p.id] && !state.blackjack.players[p.id].standing && !state.blackjack.players[p.id].busted);
         state.blackjack.currentPlayerId = firstPlayer ? firstPlayer.id : null;
         
         broadcastState();
+    },
+    
+    checkAllPlayersDone() {
+        const allPlayers = state.players.filter(p => state.blackjack.players[p.id] && state.blackjack.players[p.id].bet > 0);
+        const allDone = allPlayers.every(p => {
+            const bs = state.blackjack.players[p.id];
+            return bs.standing || bs.busted || bs.result === 'blackjack';
+        });
+        
+        if (allDone && allPlayers.length > 0) {
+            this.dealerPlay();
+        }
     },
     
     hit(socketId) {
@@ -206,6 +223,9 @@ const Blackjack = {
         if (!bs || bs.standing || bs.busted) return;
         
         bs.standing = true;
+        
+        // Check if all players are done
+        this.checkAllPlayersDone();
         this.nextPlayer();
         broadcastState();
     },
