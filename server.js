@@ -320,6 +320,10 @@ const Blackjack = {
     
     settleRound() {
         state.blackjack.phase = 'settled';
+        
+        // Schedule auto-start next round in 10 seconds
+        this.scheduleAutoStart();
+        
         const dealerScore = this.calculateScore(state.blackjack.dealerCards);
         
         for (const player of state.players) {
@@ -350,7 +354,15 @@ const Blackjack = {
         }
     },
     
+    let autoStartTimer = null;
+    
     nextRound() {
+        // Clear any existing timer
+        if (autoStartTimer) {
+            clearTimeout(autoStartTimer);
+            autoStartTimer = null;
+        }
+        
         // Reset
         for (const player of state.players) {
             if (player.balance === 0) {
@@ -363,6 +375,26 @@ const Blackjack = {
         if (state.deck.length < 20) state.deck = shuffleDeck(generateDeck());
         this.init();
         broadcastState();
+    },
+    
+    // Auto-start next round after delay
+    scheduleAutoStart() {
+        if (autoStartTimer) return; // Already scheduled
+        
+        console.log(`[AUTO] Scheduling auto-start in 10 seconds...`);
+        autoStartTimer = setTimeout(() => {
+            console.log(`[AUTO] Auto-starting next round...`);
+            this.nextRound();
+            autoStartTimer = null;
+        }, 10000); // 10 seconds
+    },
+    
+    cancelAutoStart() {
+        if (autoStartTimer) {
+            clearTimeout(autoStartTimer);
+            autoStartTimer = null;
+            console.log(`[AUTO] Auto-start cancelled`);
+        }
     }
 };
 
