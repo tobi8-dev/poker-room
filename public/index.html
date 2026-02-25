@@ -309,29 +309,119 @@
 
       <!-- Blackjack Mode -->
       <div id="blackjackUI" style="display:none;">
-        <!-- Dealer -->
-        <div style="text-align:center;margin-bottom:20px;">
-          <div style="color:#FFD700;font-size:1rem;margin-bottom:10px;">🎰 DEALER</div>
-          <div class="cards-row" id="dealerCards" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;min-height:80px;"></div>
-          <div id="dealerScore" style="font-size:1.3rem;font-weight:bold;margin-top:8px;"></div>
-        </div>
+        <style>
+          .bj-card {
+            width: 70px; height: 100px;
+            background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%);
+            border-radius: 10px;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            font-weight: bold; font-size: 1.4rem;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.5);
+            transition: transform 0.2s;
+            animation: cardDeal 0.3s ease-out;
+          }
+          .bj-card:hover { transform: translateY(-10px) scale(1.05); z-index: 10; }
+          .bj-card.red { color: #dc2626; }
+          .bj-card.black { color: #1f2937; }
+          .bj-card.back {
+            background: linear-gradient(145deg, #7c3aed 0%, #a855f7 50%, #7c3aed 100%);
+            border: 3px solid #e9d5ff;
+          }
+          .bj-card .suit { font-size: 1.8rem; line-height: 1; }
+          .bj-card .value { font-size: 1.2rem; }
+          @keyframes cardDeal {
+            from { opacity: 0; transform: translateY(-30px) scale(0.8); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+          }
+          .bj-table {
+            background: linear-gradient(180deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+            border-radius: 20px; padding: 25px;
+            border: 4px solid #D4AF37;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.5);
+          }
+          .bj-section { text-align: center; margin-bottom: 20px; }
+          .bj-label { font-size: 0.95rem; margin-bottom: 10px; font-weight: 600; }
+          .bj-label.dealer { color: #FFD700; }
+          .bj-label.player { color: #00d9ff; }
+          .bj-cards { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; min-height: 80px; }
+          .bj-score { font-size: 1.4rem; font-weight: bold; margin-top: 8px; }
+          .bj-result-win { background: linear-gradient(135deg, rgba(34,197,94,0.4), rgba(34,197,94,0.2)); color: #22c55e; }
+          .bj-result-lose { background: linear-gradient(135deg, rgba(239,68,68,0.4), rgba(239,68,68,0.2)); color: #ef4444; }
+          .bj-result-push { background: rgba(255,255,255,0.15); }
+          .bj-result-bj { background: linear-gradient(135deg, rgba(255,215,0,0.4), rgba(255,215,0,0.2)); color: #FFD700; }
+          .bj-bet-input {
+            padding: 12px 20px; border-radius: 8px; border: 2px solid #D4AF37;
+            font-size: 1.1rem; width: 100px; text-align: center; background: rgba(255,255,255,0.95);
+          }
+          .bj-btn {
+            padding: 12px 25px; border-radius: 8px; border: none; cursor: pointer;
+            font-size: 1rem; font-weight: bold; transition: all 0.2s;
+          }
+          .bj-btn:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+          .bj-btn-hit { background: linear-gradient(135deg, #22c55e, #16a34a); color: white; }
+          .bj-btn-stand { background: linear-gradient(135deg, #ef4444, #dc2626); color: white; }
+          .bj-btn-double { background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; }
+          .bj-btn-bet { background: linear-gradient(135deg, #FFD700, #D4AF37); color: #000; }
+          .bj-btn-new { background: linear-gradient(135deg, #00d9ff, #0891b2); color: #000; }
+          .bj-msg {
+            text-align: center; font-size: 1.5rem; font-weight: bold;
+            margin: 15px 0; padding: 15px; border-radius: 10px;
+            animation: slideUp 0.3s ease-out;
+          }
+          @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .bj-other-player {
+            background: rgba(0,0,0,0.5); padding: 10px 15px; border-radius: 10px;
+            text-align: center; min-width: 90px; transition: all 0.2s;
+          }
+          .bj-other-player.active { border: 2px solid #00d9ff; box-shadow: 0 0 15px rgba(0,217,255,0.3); }
+        </style>
+        
+        <div class="bj-table">
+          <!-- Dealer -->
+          <div class="bj-section">
+            <div class="bj-label dealer">🎰 DEALER</div>
+            <div class="bj-cards" id="dealerCards"></div>
+            <div class="bj-score" id="dealerScore"></div>
+          </div>
 
-        <!-- Message -->
-        <div id="bjMessage" style="text-align:center;font-size:1.3rem;font-weight:bold;margin:10px 0;padding:10px;border-radius:8px;display:none;"></div>
+          <!-- Message -->
+          <div class="bj-msg" id="bjMessage" style="display:none;"></div>
 
-        <!-- Player -->
-        <div style="text-align:center;">
-          <div style="color:#00d9ff;font-size:1rem;margin-bottom:10px;">👤 YOU</div>
-          <div class="cards-row" id="playerCards" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;min-height:80px;"></div>
-          <div id="playerScore" style="font-size:1.3rem;font-weight:bold;margin-top:8px;"></div>
-          <div id="playerBet" style="color:#f59e0b;margin-top:5px;"></div>
-        </div>
+          <!-- Player -->
+          <div class="bj-section">
+            <div class="bj-label player">👤 YOU</div>
+            <div class="bj-cards" id="playerCards"></div>
+            <div class="bj-score" id="playerScore"></div>
+            <div id="playerBet" style="color: #f59e0b; margin-top: 5px; font-size: 1rem;"></div>
+          </div>
 
-        <!-- Betting -->
-        <div id="bettingSection" style="text-align:center;margin:15px 0;padding:15px;background:rgba(0,0,0,0.3);border-radius:10px;">
-          <input type="number" id="bjBet" value="10" min="1" style="padding:10px;border-radius:6px;border:2px solid #FFD700;width:80px;text-align:center;font-size:1rem;" />
-          <button onclick="placeBet()" style="padding:10px 20px;border-radius:6px;border:none;background:#FFD700;color:#000;font-weight:bold;cursor:pointer;margin-left:8px;">💰 Place Bet</button>
+          <!-- Betting -->
+          <div id="bettingSection" style="text-align:center;margin:15px 0;padding:15px;background:rgba(0,0,0,0.4);border-radius:12px;">
+            <span style="color:#FFD700;margin-right:10px;">💰 Bet:</span>
+            <input type="number" id="bjBet" class="bj-bet-input" value="10" min="1" />
+            <button onclick="placeBet()" class="bj-btn bj-btn-bet" style="margin-left:10px;">Place Bet</button>
+          </div>
+
+          <!-- Controls -->
+          <div id="bjControls" style="display:none;justify-content:center;gap:12px;margin-top:15px;">
+            <button onclick="hit()" class="bj-btn bj-btn-hit">🖐️ Hit</button>
+            <button onclick="stand()" class="bj-btn bj-btn-stand">✋ Stand</button>
+            <button onclick="double()" id="doubleBtn" class="bj-btn bj-btn-double">✌️ Double</button>
+          </div>
+
+          <!-- Next Round -->
+          <div id="bjNextRound" style="display:none;text-align:center;margin-top:15px;">
+            <button onclick="nextRound()" class="bj-btn bj-btn-new">🎮 Next Round</button>
+          </div>
+
+          <!-- Other Players -->
+          <div id="bjOtherPlayers" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px;padding-top:15px;border-top:1px solid rgba(255,255,255,0.2);"></div>
         </div>
+      </div>
 
         <!-- Controls -->
         <div id="bjControls" style="display:none;justify-content:center;gap:10px;margin-top:15px;">
@@ -602,9 +692,10 @@
       // Dealer
       const dealerHtml = bj.dealerCards.map((c, i) => {
         if (i === 0 && bj.phase !== 'dealer' && bj.phase !== 'settled') {
-          return '<div class="card back"></div>';
+          return '<div class="bj-card back"></div>';
         }
-        return renderCard(c);
+        const color = (c.suit === '♥' || c.suit === '♦') ? 'red' : 'black';
+        return `<div class="bj-card ${color}"><div class="value">${c.value}</div><div class="suit">${c.suit}</div></div>`;
       });
       document.getElementById('dealerCards').innerHTML = dealerHtml;
       
@@ -613,7 +704,11 @@
 
       // Player
       if (me && me.cards && me.cards.length > 0) {
-        document.getElementById('playerCards').innerHTML = me.cards.map(c => renderCard(c)).join('');
+        const playerHtml = me.cards.map(c => {
+          const color = (c.suit === '♥' || c.suit === '♦') ? 'red' : 'black';
+          return `<div class="bj-card ${color}"><div class="value">${c.value}</div><div class="suit">${c.suit}</div></div>`;
+        }).join('');
+        document.getElementById('playerCards').innerHTML = playerHtml;
         let score = 0, aces = 0;
         for (const c of me.cards) {
           if (['J','Q','K'].includes(c.value)) score += 10;
@@ -644,6 +739,7 @@
         nextRoundDiv.style.display = 'none';
         if (bs && bs.bet > 0) {
           msg.style.display = 'block';
+          msg.className = 'bj-msg';
           msg.style.background = 'rgba(255,255,255,0.1)';
           msg.textContent = 'Waiting for other players...';
         }
@@ -655,6 +751,7 @@
         document.getElementById('doubleBtn').disabled = !canDouble;
         if (bj.currentPlayerId === myId) {
           msg.style.display = 'block';
+          msg.className = 'bj-msg';
           msg.style.background = 'rgba(0,217,255,0.2)';
           msg.textContent = "🎯 Your turn!";
         }
@@ -664,11 +761,12 @@
         nextRoundDiv.style.display = 'block';
         if (bs && bs.result) {
           msg.style.display = 'block';
-          if (bs.result === 'blackjack') { msg.style.background = 'rgba(255,215,0,0.3)'; msg.textContent = '🎉 BLACKJACK!'; }
-          else if (bs.result === 'win') { msg.style.background = 'rgba(34,197,94,0.3)'; msg.textContent = '🎊 You Win!'; }
-          else if (bs.result === 'lose') { msg.style.background = 'rgba(239,68,68,0.3)'; msg.textContent = '💀 Dealer Wins'; }
-          else if (bs.result === 'push') { msg.style.background = 'rgba(255,255,255,0.2)'; msg.textContent = '⚖️ Push'; }
-          else if (bs.result === 'bust') { msg.style.background = 'rgba(239,68,68,0.3)'; msg.textContent = '💥 BUST!'; }
+          msg.className = 'bj-msg';
+          if (bs.result === 'blackjack') { msg.className += ' bj-result-bj'; msg.textContent = '🎉 BLACKJACK! 3:2 Payout!'; }
+          else if (bs.result === 'win') { msg.className += ' bj-result-win'; msg.textContent = '🎊 You Win!'; }
+          else if (bs.result === 'lose') { msg.className += ' bj-result-lose'; msg.textContent = '💀 Dealer Wins'; }
+          else if (bs.result === 'push') { msg.className += ' bj-result-push'; msg.textContent = '⚖️ Push - Bet Returned'; }
+          else if (bs.result === 'bust') { msg.className += ' bj-result-lose'; msg.textContent = '💥 BUST!'; }
         }
       }
 
@@ -678,10 +776,20 @@
         if (p.id === myId) continue;
         const pbs = bj.players[p.id];
         const isActive = p.id === bj.currentPlayerId;
-        html += `<div style="background:rgba(0,0,0,0.4);padding:8px 12px;border-radius:8px;text-align:center;min-width:80px;${isActive ? 'border:2px solid #00d9ff;' : ''}">`;
+        html += `<div class="bj-other-player ${isActive ? 'active' : ''}">`;
         html += `<div style="font-size:0.8rem;color:#aaa;">${p.name}</div>`;
         if (p.cards && p.cards.length > 0) {
-          html += '<div style="display:flex;gap:3px;justify-content:center;margin:5px 0;">' + p.cards.map(c => `<div class="card" style="width:30px;height:42px;font-size:0.6rem;">${c.value}${c.suit}</div>`).join('') + '</div>';
+          html += '<div style="display:flex;gap:3px;justify-content:center;margin:5px 0;">';
+          html += p.cards.map(c => `<div class="bj-card" style="width:30px;height:42px;font-size:0.6rem;">${c.value}<br>${c.suit}</div>`).join('');
+          html += '</div>';
+          let score = 0, aces = 0;
+          for (const c of p.cards) {
+            if (['J','Q','K'].includes(c.value)) score += 10;
+            else if (c.value === 'A') { score += 11; aces++; }
+            else score += parseInt(c.value);
+          }
+          while (score > 21 && aces > 0) { score -= 10; aces--; }
+          html += `<div style="font-size:0.85rem;">${score}</div>`;
         } else {
           html += '<div style="color:#666;font-size:0.6rem;margin:5px 0;">Waiting...</div>';
         }
