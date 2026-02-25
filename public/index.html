@@ -749,7 +749,14 @@
           msg.style.display = 'block';
           msg.className = 'bj-msg';
           msg.style.background = 'rgba(255,255,255,0.1)';
-          msg.textContent = 'Waiting for other players...';
+          // Find current player index
+          const currentIdx = state.players.findIndex(p => p.id === state.blackjack.currentPlayerId);
+          const currentPlayer = state.players[currentIdx];
+          if (currentPlayer) {
+            msg.textContent = `🎯 Waiting for #${currentIdx + 1} ${currentPlayer.name}...`;
+          } else {
+            msg.textContent = 'Waiting for other players...';
+          }
         }
       } else if (bj.phase === 'playing') {
         betSection.style.display = 'none';
@@ -761,7 +768,8 @@
           msg.style.display = 'block';
           msg.className = 'bj-msg';
           msg.style.background = 'rgba(0,217,255,0.2)';
-          msg.textContent = "🎯 Your turn!";
+          const myIdx = state.players.findIndex(p => p.id === myId);
+          msg.textContent = `🎯 #${myIdx + 1} Your turn!`;
         }
       } else if (bj.phase === 'settled') {
         betSection.style.display = 'none';
