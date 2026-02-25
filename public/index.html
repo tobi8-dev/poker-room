@@ -781,7 +781,8 @@
       // All players at table (show everyone)
       let html = '<div style="margin-top:15px;padding-top:15px;border-top:1px solid rgba(255,255,255,0.2);"><div style="text-align:center;color:#aaa;font-size:0.8rem;margin-bottom:10px;">🎴 ALL PLAYERS</div><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">';
       
-      for (const p of state.players) {
+      for (let i = 0; i < state.players.length; i++) {
+        const p = state.players[i];
         if (p.id === myId) continue; // Skip self (already shown above)
         
         const pbs = bj.players[p.id];
@@ -789,6 +790,7 @@
         const hasBet = pbs && pbs.bet > 0;
         
         html += `<div class="bj-other-player ${isActive ? 'active' : ''}" style="${hasBet ? 'border:2px solid #FFD700;' : 'opacity:0.6;'}">`;
+        html += `<div style="font-size:0.75rem;color:#888;">#${i + 1}</div>`;
         html += `<div style="font-size:0.85rem;font-weight:bold;color:${isActive ? '#00d9ff' : '#fff'};">${p.name} ${isActive ? '🎯' : ''}</div>`;
         
         if (p.cards && p.cards.length > 0) {
