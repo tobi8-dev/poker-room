@@ -243,25 +243,35 @@
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>🐲 新年快乐 🧧<br><small>Chinese New Year Card Game</small></h1>
-      
-      <!-- Game Mode Selector -->
-      <div style="margin:15px 0;padding:10px;background:rgba(0,0,0,0.3);border-radius:10px;display:inline-block;">
-        <span style="margin-right:10px;color:#FFD700;">Game Mode:</span>
-        <label style="margin-right:15px;cursor:pointer;">
-          <input type="radio" name="gameMode" value="freeDeal" checked onchange="setGameMode()"> 
-          <span style="color:#fff;">🃏 Free Deal</span>
-        </label>
-        <label style="cursor:pointer;">
-          <input type="radio" name="gameMode" value="blackjack" onchange="setGameMode()"> 
-          <span style="color:#fff;">🎯 21点 Blackjack</span>
-        </label>
+  <!-- Welcome Screen -->
+  <div id="welcomeScreen" style="display:block;position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#8B0000 0%,#D4AF37 50%,#8B0000 100%);z-index:1000;padding:40px 20px;text-align:center;">
+    <h1 style="font-size:3rem;margin-bottom:10px;">🐲 新年快乐 🧧</h1>
+    <p style="font-size:1.5rem;color:#FFD700;margin-bottom:40px;">Choose Your Game</p>
+    
+    <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:40px;">
+      <div onclick="selectGame('freeDeal')" id="game-freeDeal" style="background:rgba(0,0,0,0.5);border:3px solid #FFD700;border-radius:16px;padding:30px;width:200px;cursor:pointer;transition:all 0.3s;">
+        <div style="font-size:3rem;">🃏</div>
+        <div style="font-size:1.3rem;font-weight:bold;color:#FFD700;">Free Deal</div>
+        <div style="font-size:0.9rem;color:#ccc;margin-top:8px;">Deal cards freely</div>
       </div>
       
+      <div onclick="selectGame('blackjack')" id="game-blackjack" style="background:rgba(0,0,0,0.5);border:3px solid #666;border-radius:16px;padding:30px;width:200px;cursor:pointer;transition:all 0.3s;opacity:0.7;">
+        <div style="font-size:3rem;">🎯</div>
+        <div style="font-size:1.3rem;font-weight:bold;color:#FFD700;">21点 Blackjack</div>
+        <div style="font-size:0.9rem;color:#ccc;margin-top:8px;">Classic casino blackjack</div>
+      </div>
+    </div>
+    
+    <input type="text" id="playerName" placeholder="Enter your name" style="padding:15px 20px;border-radius:10px;border:2px solid #FFD700;font-size:1.1rem;width:250px;background:rgba(255,255,255,0.95);" />
+    <button onclick="goToGame()" style="padding:15px 30px;border-radius:10px;border:none;font-size:1.1rem;font-weight:bold;background:#00d9ff;color:#000;cursor:pointer;margin-left:10px;">🎮 Play Now</button>
+  </div>
+
+  <div class="container" style="display:none;" id="gameContainer">
+    <header>
+      <h1>🐲 新年快乐 🧧<br><small id="gameModeTitle">Free Deal Mode</small></h1>
+      <button onclick="location.reload()" style="padding:8px 16px;background:#6b7280;color:white;border:none;border-radius:6px;cursor:pointer;margin-bottom:10px;">← Change Game</button>
       <div class="join-section">
-        <input type="text" id="playerName" placeholder="Your name" />
+        <input type="text" id="playerName2" placeholder="Your name" />
         <button id="joinBtn" class="btn-primary">Join Table</button>
         <div style="margin-top:10px;padding:10px;background:rgba(0,0,0,0.3);border-radius:8px;">
           <input type="password" id="adminPassword" placeholder="Admin password" style="width:120px;padding:8px;font-size:0.8rem;" />
@@ -324,6 +334,43 @@
       fortuneIndex = (fortuneIndex + 1) % fortunes.length;
       document.getElementById('fortune').textContent = fortunes[fortuneIndex];
     }, 4000);
+    
+    // =======================================================================
+    // WELCOME SCREEN
+    // =======================================================================
+    let selectedGameMode = 'freeDeal';
+    
+    function selectGame(mode) {
+      selectedGameMode = mode;
+      
+      // Update UI
+      document.getElementById('game-freeDeal').style.borderColor = mode === 'freeDeal' ? '#00d9ff' : '#666';
+      document.getElementById('game-freeDeal').style.opacity = mode === 'freeDeal' ? '1' : '0.7';
+      document.getElementById('game-blackjack').style.borderColor = mode === 'blackjack' ? '#00d9ff' : '#666';
+      document.getElementById('game-blackjack').style.opacity = mode === 'blackjack' ? '1' : '0.7';
+    }
+    
+    function goToGame() {
+      const name = document.getElementById('playerName').value.trim();
+      if (!name) { alert('Enter your name!'); return; }
+      
+      // Hide welcome, show game
+      document.getElementById('welcomeScreen').style.display = 'none';
+      document.getElementById('gameContainer').style.display = 'block';
+      
+      // Update game mode title
+      document.getElementById('gameModeTitle').textContent = selectedGameMode === 'freeDeal' ? 'Free Deal Mode' : '🎯 21点 Blackjack';
+      
+      // Set player name in game
+      document.getElementById('playerName').value = name;
+      document.getElementById('playerName2').value = name;
+      
+      // Join the game
+      document.getElementById('joinBtn').click();
+      
+      // Set game mode
+      socket.emit('setGameMode', selectedGameMode);
+    }
     
     // =======================================================================
     // GAME MODE
