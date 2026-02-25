@@ -357,7 +357,7 @@ io.on('connection', (socket) => {
 
     // Game Mode
     socket.on('setGameMode', (mode) => {
-        if (!isAdmin(socket.id)) return;
+        // Any player can set game mode when joining
         state.gameMode = mode;
         
         if (mode === GameMode.BLACKJACK) {
@@ -366,7 +366,7 @@ io.on('connection', (socket) => {
             state.blackjack = null;
         }
         
-        console.log(`[MODE] ${mode}`);
+        console.log(`[MODE] ${mode} set by ${socket.id}`);
         broadcastState();
     });
 
