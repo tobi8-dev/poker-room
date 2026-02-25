@@ -680,6 +680,10 @@
     function hit() { socket.emit('hit'); }
     function stand() { socket.emit('stand'); }
     function double() { socket.emit('double'); }
+    function split() { socket.emit('split'); }
+    function surrender() { socket.emit('surrender'); }
+    function buyInsurance() { socket.emit('buyInsurance'); }
+    function declineInsurance() { socket.emit('declineInsurance'); }
     function nextRound() { socket.emit('nextRound'); }
 
     function renderBlackjack(state) {
