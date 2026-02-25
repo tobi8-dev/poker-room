@@ -390,10 +390,12 @@ io.on('connection', (socket) => {
         
         broadcastBalance(socket.id);
         
+        // Start new round if not already in progress
         if (blackjack.phase === 'waiting') {
             startNewRound();
         } else if (blackjack.phase === 'settled') {
             // Ready for next round
+            startNewRound();
         }
         
         broadcastGameState();
