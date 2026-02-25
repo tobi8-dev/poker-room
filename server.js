@@ -2,9 +2,10 @@
  * CNY Card Game Server
  * ====================
  * A real-time multiplayer card game server using Socket.IO
+ * Supports: 21点 (Blackjack)
  * 
  * @author Tobi
- * @version 1.0.0
+ * @version 2.0.0
  */
 
 // =============================================================================
@@ -35,10 +36,22 @@ app.use(express.static(path.join(__dirname, 'public')));
 // GAME STATE
 // =============================================================================
 const gameState = {
+    // Card deck
     deck: [],
-    players: [],
-    centerCards: [],
-    currentPlayerIndex: 0,
+    
+    // Player management
+    players: {},
+    
+    // Blackjack game state
+    blackjack: {
+        dealerCards: [],
+        currentPlayerId: null,
+        bet: 0,
+        gameOver: false,
+        result: null,
+        dealerHidden: true
+    },
+    
     adminId: null
 };
 
@@ -48,7 +61,6 @@ const gameState = {
 
 /**
  * Generate a standard 52-card deck
- * @returns {Array} Array of card objects
  */
 function generateDeck() {
     const suits = ['♠️', '♥️', '♦️', '♣️'];
@@ -68,54 +80,233 @@ function generateDeck() {
 }
 
 /**
- * Fisher-Yates shuffle algorithm - truly random shuffle
- * @param {Array} deck - Array to shuffle
- * @returns {Array} Shuffled array
+ * Fisher-Yates shuffle
  */
 function shuffleDeck(deck) {
-    // Create a copy to avoid mutating original
     const shuffled = [...deck];
-    
     for (let i = shuffled.length - 1; i > 0; i--) {
-        // Random index from 0 to i
         const j = Math.floor(Math.random() * (i + 1));
-        
-        // Swap elements i and j
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    
     return shuffled;
 }
 
-// Initialize deck
-gameState.deck = shuffleDeck(generateDeck());
+/**
+ * Get card value for scoring
+ */
+function getCardValue(card) {
+    if (['J', 'Q', 'K'].includes(card.value)) return 10;
+    if (card.value === 'A') return 11; // Will be reduced to 1 if needed
+    return parseInt(card.value);
+}
+
+/**
+ * Calculate hand score (handles Aces)
+ */
+function calculateScore(cards) {
+    let score = 0;
+    let aces = 0;
+    
+    for (const card of cards) {
+        score += getCardValue(card);
+        if (card.value === 'A') aces++;
+    }
+    
+    // Reduce Aces from 11 to 1 while over 21
+    while (score > 21 && aces > 0) {
+        score -= 10;
+        aces--;
+    }
+    
+    return score;
+}
+
+/**
+ * Initialize/reshuffle deck
+ */
+function initDeck() {
+    gameState.deck = shuffleDeck(generateDeck());
+}
+
+// Initialize deck on start
+initDeck();
 
 // =============================================================================
 // HELPER FUNCTIONS
 // =============================================================================
 
-/**
- * Check if a socket is the admin
- * @param {string} socketId - The socket ID to check
- * @returns {boolean} True if admin
- */
 function isAdmin(socketId) {
     return gameState.adminId && socketId === gameState.adminId;
 }
 
-/**
- * Broadcast current game state to all connected clients
- */
-function broadcastState() {
-    // Add 'isMe' flag to each player for client rendering
-    const stateToSend = {
-        ...gameState,
-        players: gameState.players.map(p => ({
-            ...p,
-            isMe: false // Will be set by client
-        }))
+function getPlayer(socketId) {
+    return gameState.players[socketId];
+}
+
+function broadcastGameState() {
+    // Send to the specific player their balance
+    const state = {
+        dealerCards: gameState.blackjack.dealerCards,
+        dealerHidden: gameState.blackjack.dealerHidden,
+        dealerScore: gameState.blackjack.dealerHidden ? '?' : calculateScore(gameState.blackjack.dealerCards),
+        playerCards: [],
+        playerScore: 0,
+        gameOver: gameState.blackjack.gameOver,
+        result: gameState.blackjack.result
     };
-    io.emit('updateGame', stateToSend);
+    
+    // Broadcast to all
+    io.emit('gameState', state);
+}
+
+function broadcastBalance(socketId) {
+    const player = gameState.players[socketId];
+    if (player) {
+        io.to(socketId).emit('balanceUpdate', player.balance);
+    }
+}
+
+// =============================================================================
+// BLACKJACK GAME LOGIC
+// =============================================================================
+
+function startBlackjackRound(bet) {
+    // Reset round
+    gameState.blackjack = {
+        dealerCards: [],
+        currentPlayerId: null,
+        bet: bet,
+        gameOver: false,
+        result: null,
+        dealerHidden: true
+    };
+    
+    // Deal initial cards: player, dealer, player, dealer
+    gameState.blackjack.dealerCards.push(gameState.deck.pop());
+    gameState.blackjack.dealerCards.push(gameState.deck.pop());
+    
+    const playerCards = [gameState.deck.pop(), gameState.deck.pop()];
+    
+    // Check for blackjack
+    const playerScore = calculateScore(playerCards);
+    const dealerScore = calculateScore(gameState.blackjack.dealerCards);
+    
+    // Store player cards in their player object
+    for (const socketId in gameState.players) {
+        gameState.players[socketId].cards = [...playerCards];
+        gameState.players[socketId].currentBet = bet;
+    }
+    
+    // Check for instant blackjack
+    if (playerScore === 21) {
+        gameState.blackjack.gameOver = true;
+        
+        if (dealerScore === 21) {
+            gameState.blackjack.result = 'push';
+            // Return bet
+            const player = gameState.players[gameState.blackjack.currentPlayerId];
+            if (player) player.balance += bet;
+        } else {
+            gameState.blackjack.result = 'blackjack';
+            // Blackjack pays 3:2
+            const player = gameState.players[gameState.blackjack.currentPlayerId];
+            if (player) player.balance += Math.floor(bet * 2.5);
+        }
+        
+        gameState.blackjack.dealerHidden = false;
+    }
+    
+    broadcastGameState();
+}
+
+function playerHit() {
+    const playerId = gameState.blackjack.currentPlayerId;
+    const player = gameState.players[playerId];
+    
+    if (!player || gameState.blackjack.gameOver) return;
+    
+    // Deal card to player
+    player.cards.push(gameState.deck.pop());
+    
+    const score = calculateScore(player.cards);
+    
+    // Check if bust
+    if (score > 21) {
+        // Player busts - dealer wins
+        gameState.blackjack.gameOver = true;
+        gameState.blackjack.result = 'lose';
+        gameState.blackjack.dealerHidden = false;
+    }
+    
+    broadcastGameState();
+}
+
+function playerStand() {
+    // Dealer plays
+    gameState.blackjack.dealerHidden = false;
+    
+    // Dealer hits until 17+
+    let dealerScore = calculateScore(gameState.blackjack.dealerCards);
+    
+    while (dealerScore < 17) {
+        gameState.blackjack.dealerCards.push(gameState.deck.pop());
+        dealerScore = calculateScore(gameState.blackjack.dealerCards);
+    }
+    
+    // Determine winner
+    const player = gameState.players[gameState.blackjack.currentPlayerId];
+    const playerScore = calculateScore(player.cards);
+    const bet = gameState.blackjack.bet;
+    
+    gameState.blackjack.gameOver = true;
+    
+    if (dealerScore > 21) {
+        // Dealer busts - player wins
+        gameState.blackjack.result = 'win';
+        if (player) player.balance += bet * 2;
+    } else if (playerScore > dealerScore) {
+        gameState.blackjack.result = 'win';
+        if (player) player.balance += bet * 2;
+    } else if (playerScore < dealerScore) {
+        gameState.blackjack.result = 'lose';
+    } else {
+        // Push
+        gameState.blackjack.result = 'push';
+        if (player) player.balance += bet;
+    }
+    
+    broadcastGameState();
+    broadcastBalance(gameState.blackjack.currentPlayerId);
+}
+
+function playerDouble() {
+    const playerId = gameState.blackjack.currentPlayerId;
+    const player = gameState.players[playerId];
+    const currentBet = gameState.blackjack.bet;
+    
+    if (!player || player.balance < currentBet) return;
+    
+    // Double the bet
+    player.balance -= currentBet;
+    gameState.blackjack.bet = currentBet * 2;
+    
+    // Deal one card
+    player.cards.push(gameState.deck.pop());
+    
+    const score = calculateScore(player.cards);
+    
+    // If bust, lose immediately
+    if (score > 21) {
+        gameState.blackjack.gameOver = true;
+        gameState.blackjack.result = 'lose';
+        gameState.blackjack.dealerHidden = false;
+    } else {
+        // Otherwise auto-stand
+        playerStand();
+    }
+    
+    broadcastGameState();
+    broadcastBalance(playerId);
 }
 
 // =============================================================================
@@ -125,226 +316,142 @@ function broadcastState() {
 io.on('connection', (socket) => {
     console.log(`[CONNECT] User connected: ${socket.id}`);
     
-    // Send current game state to newly connected user
-    socket.emit('updateGame', gameState);
+    // Send current game state
+    socket.emit('gameState', {
+        dealerCards: [],
+        dealerHidden: true,
+        dealerScore: '?',
+        playerCards: [],
+        playerScore: 0,
+        gameOver: false,
+        result: null
+    });
 
     // -------------------------------------------------------------------------
-    // ADMIN AUTHENTICATION
+    // ADMIN
     // -------------------------------------------------------------------------
-    socket.on('setAdminPassword', (password) => {
+    socket.on('setAdmin', ({ password }) => {
         if (password === ADMIN_PASSWORD) {
             gameState.adminId = socket.id;
             console.log(`[ADMIN] Admin authenticated: ${socket.id}`);
-            broadcastState();
         } else {
-            console.log(`[ADMIN] Failed auth attempt from: ${socket.id}`);
             socket.emit('error', 'Wrong password!');
         }
     });
+    
+    socket.on('adminReset', () => {
+        if (!isAdmin(socket.id)) return;
+        
+        // Reset all players
+        for (const id in gameState.players) {
+            gameState.players[id].balance = 100;
+            gameState.players[id].cards = [];
+            gameState.players[id].currentBet = 0;
+        }
+        
+        initDeck();
+        gameState.blackjack = {
+            dealerCards: [],
+            currentPlayerId: null,
+            bet: 0,
+            gameOver: false,
+            result: null,
+            dealerHidden: true
+        };
+        
+        broadcastGameState();
+        for (const id in gameState.players) {
+            broadcastBalance(id);
+        }
+    });
 
     // -------------------------------------------------------------------------
-    // PLAYER MANAGEMENT
+    // JOIN GAME
     // -------------------------------------------------------------------------
-    socket.on('join', (playerName) => {
-        const existingPlayer = gameState.players.find(p => p.id === socket.id);
+    socket.on('joinGame', ({ name, game }) => {
+        if (game !== 'blackjack') {
+            socket.emit('error', 'Game not available yet!');
+            return;
+        }
         
-        if (existingPlayer) {
-            // Update name if already joined
-            existingPlayer.name = playerName;
-        } else {
-            // Add new player
-            gameState.players.push({
+        // Create or update player
+        if (!gameState.players[socket.id]) {
+            gameState.players[socket.id] = {
                 id: socket.id,
-                name: playerName,
+                name: name,
+                balance: 100,
                 cards: [],
-                balance: 0
-            });
-            console.log(`[PLAYER] ${playerName} joined (${socket.id})`);
+                currentBet: 0
+            };
+            console.log(`[PLAYER] ${name} joined (${socket.id})`);
+        } else {
+            gameState.players[socket.id].name = name;
         }
-        broadcastState();
+        
+        // Send balance
+        broadcastBalance(socket.id);
+        
+        // If no active game, ready to bet
+        if (!gameState.blackjack.currentPlayerId && !gameState.blackjack.gameOver) {
+            // Ready for new bet
+        }
+        
+        broadcastGameState();
     });
 
-    socket.on('removePlayer', (playerId) => {
-        if (!isAdmin(socket.id)) {
-            socket.emit('error', 'Only admin can remove players!');
-            return;
+    socket.on('leaveGame', () => {
+        const player = gameState.players[socket.id];
+        if (player && gameState.blackjack.currentPlayerId === socket.id) {
+            // Forfeit current bet
+            gameState.blackjack.currentPlayerId = null;
+            gameState.blackjack.gameOver = true;
+            gameState.blackjack.result = 'forfeit';
         }
-        
-        const player = gameState.players.find(p => p.id === playerId);
-        if (player) {
-            // Return cards to deck
-            gameState.deck.push(...player.cards);
-            console.log(`[PLAYER] Removed: ${player.name}`);
-        }
-        
-        gameState.players = gameState.players.filter(p => p.id !== playerId);
-        broadcastState();
-    });
-
-    // -------------------------------------------------------------------------
-    // DECK OPERATIONS (Admin Only)
-    // -------------------------------------------------------------------------
-    socket.on('shuffle', () => {
-        if (!isAdmin(socket.id)) {
-            socket.emit('error', 'Only admin can shuffle!');
-            return;
-        }
-        
-        gameState.deck = shuffleDeck(generateDeck());
-        console.log(`[DECK] Shuffled by admin (${socket.id})`);
-        broadcastState();
+        broadcastGameState();
     });
 
     // -------------------------------------------------------------------------
-    // DEALING CARDS (Admin Only)
+    // BLACKJACK ACTIONS
     // -------------------------------------------------------------------------
-    socket.on('dealToAll', () => {
-        if (!isAdmin(socket.id)) {
-            socket.emit('error', 'Only admin can deal!');
+    socket.on('placeBet', ({ bet }) => {
+        const player = gameState.players[socket.id];
+        
+        if (!player) {
+            socket.emit('error', 'Join game first!');
             return;
         }
         
-        if (gameState.players.length === 0) {
-            socket.emit('error', 'No players at table!');
+        if (bet < 1 || bet > player.balance) {
+            socket.emit('error', 'Invalid bet amount!');
             return;
         }
         
-        if (gameState.deck.length < gameState.players.length) {
-            socket.emit('error', 'Not enough cards! Shuffle first.');
+        if (gameState.blackjack.currentPlayerId) {
+            socket.emit('error', 'Game in progress!');
             return;
         }
         
-        // Deal one card to each player
-        gameState.players.forEach(player => {
-            const card = gameState.deck.pop();
-            player.cards.push(card);
-        });
+        // Place bet
+        player.balance -= bet;
+        gameState.blackjack.currentPlayerId = socket.id;
         
-        console.log(`[DEAL] Cards dealt to all ${gameState.players.length} players`);
-        broadcastState();
+        broadcastBalance(socket.id);
+        startBlackjackRound(bet);
     });
 
-    socket.on('dealToCenter', () => {
-        if (!isAdmin(socket.id)) {
-            socket.emit('error', 'Only admin can deal!');
-            return;
-        }
-        
-        if (gameState.deck.length === 0) {
-            socket.emit('error', 'Deck is empty! Shuffle first.');
-            return;
-        }
-        
-        gameState.centerCards.push(gameState.deck.pop());
-        console.log(`[DEAL] Card dealt to center (${gameState.centerCards.length} total)`);
-        broadcastState();
+    socket.on('hit', () => {
+        if (gameState.blackjack.currentPlayerId !== socket.id) return;
+        playerHit();
     });
 
-    socket.on('dealToPlayer', (playerId) => {
-        if (!isAdmin(socket.id)) {
-            socket.emit('error', 'Only admin can deal!');
-            return;
-        }
-        
-        if (gameState.deck.length === 0) {
-            socket.emit('error', 'Deck is empty! Shuffle first.');
-            return;
-        }
-        
-        const player = gameState.players.find(p => p.id === playerId);
-        if (player) {
-            player.cards.push(gameState.deck.pop());
-            console.log(`[DEAL] Card dealt to ${player.name}`);
-            broadcastState();
-        }
+    socket.on('stand', () => {
+        if (gameState.blackjack.currentPlayerId !== socket.id) return;
+        playerStand();
     });
 
-    // -------------------------------------------------------------------------
-    // TABLE MANAGEMENT (Admin Only)
-    // -------------------------------------------------------------------------
-    socket.on('clearCenter', () => {
-        if (!isAdmin(socket.id)) {
-            socket.emit('error', 'Only admin can clear table!');
-            return;
-        }
-        
-        // Return center cards to deck and reshuffle
-        gameState.deck.push(...gameState.centerCards);
-        gameState.deck = shuffleDeck(gameState.deck);
-        gameState.centerCards = [];
-        
-        console.log(`[TABLE] Center cleared, deck reshuffled`);
-        broadcastState();
-    });
-
-    socket.on('returnCardToDeck', (cardIndex) => {
-        if (!isAdmin(socket.id)) {
-            socket.emit('error', 'Only admin can return cards!');
-            return;
-        }
-        
-        if (cardIndex >= 0 && cardIndex < gameState.centerCards.length) {
-            const card = gameState.centerCards.splice(cardIndex, 1)[0];
-            gameState.deck.push(card);
-            console.log(`[CARD] Returned ${card.value}${card.suit} to deck`);
-            broadcastState();
-        }
-    });
-
-    // -------------------------------------------------------------------------
-    // BALANCE MANAGEMENT (Player can update own, Admin can update anyone)
-    // -------------------------------------------------------------------------
-    socket.on('updateBalance', ({ playerId, amount }) => {
-        const isOwnBalance = socket.id === playerId;
-        
-        if (!isAdmin(socket.id) && !isOwnBalance) {
-            socket.emit('error', 'You can only update your own balance!');
-            return;
-        }
-        
-        const player = gameState.players.find(p => p.id === playerId);
-        if (player) {
-            player.balance = (player.balance || 0) + amount;
-            console.log(`[BALANCE] ${player.name}: ${amount > 0 ? '+' : ''}${amount}`);
-            broadcastState();
-        }
-    });
-
-    // -------------------------------------------------------------------------
-    // GAME RESET (Admin Only)
-    // -------------------------------------------------------------------------
-    socket.on('resetGame', () => {
-        if (!isAdmin(socket.id)) {
-            socket.emit('error', 'Only admin can reset game!');
-            return;
-        }
-        
-        gameState.deck = shuffleDeck(generateDeck());
-        gameState.players = [];
-        gameState.centerCards = [];
-        gameState.currentPlayerIndex = 0;
-        gameState.adminId = null;
-        
-        console.log(`[GAME] Reset by admin`);
-        broadcastState();
-    });
-
-    // -------------------------------------------------------------------------
-    // DEBUG FUNCTIONS (Admin Only) - FOR TESTING ONLY
-    // -------------------------------------------------------------------------
-    socket.on('debugShowDeck', () => {
-        if (!isAdmin(socket.id)) {
-            socket.emit('error', 'Admin only!');
-            return;
-        }
-        
-        // Send deck to admin only (not broadcast)
-        const deckInfo = gameState.deck.map((card, index) => {
-            return { index: index + 1, ...card };
-        });
-        
-        socket.emit('debugDeck', deckInfo);
-        console.log(`[DEBUG] Deck sequence sent to admin (${deckInfo.length} cards)`);
+    socket.on('double', () => {
+        if (gameState.blackjack.currentPlayerId !== socket.id) return;
+        playerDouble();
     });
 
     // -------------------------------------------------------------------------
@@ -353,11 +460,12 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log(`[DISCONNECT] User disconnected: ${socket.id}`);
         
-        // Optionally remove player on disconnect
-        const player = gameState.players.find(p => p.id === socket.id);
-        if (player) {
-            // Keep player but mark as disconnected for reconnection handling
-            console.log(`[PLAYER] ${player.name} disconnected`);
+        // If current player disconnects, end the game
+        if (gameState.blackjack.currentPlayerId === socket.id) {
+            gameState.blackjack.gameOver = true;
+            gameState.blackjack.result = 'forfeit';
+            gameState.blackjack.dealerHidden = false;
+            broadcastGameState();
         }
     });
 });
@@ -368,17 +476,14 @@ io.on('connection', (socket) => {
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`
 ╔════════════════════════════════════════════════════════════╗
-║  🐲 CNY Card Game Server                                   ║
-║  ==========================================================  ║
-║  Server running on: http://0.0.0.0:${PORT}                   ║
-║  Admin password: ${ADMIN_PASSWORD}                                     ║
-║  ==========================================================  ║
-║  Commands:                                                  ║
-║    • shuffle    - Shuffle the deck                         ║
-║    • dealToAll  - Deal 1 card to each player               ║
-║    • dealToCenter - Deal 1 card to table center            ║
-║    • clearCenter - Return center cards and reshuffle        ║
-║    • resetGame  - Reset everything                          ║
+║  🐲 CNY Card Game Server v2.0                             ║
+║  ==========================================================║
+║  Server running on: http://0.0.0.0:${PORT}                ║
+║  Admin password: ${ADMIN_PASSWORD}                                   ║
+║  ==========================================================║
+║  Games:                                                  ║
+║    • 21点 (Blackjack) - Play now!                        ║
+║    • More coming soon...                                 ║
 ╚════════════════════════════════════════════════════════════╝
     `);
 });
