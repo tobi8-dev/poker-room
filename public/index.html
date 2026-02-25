@@ -281,29 +281,73 @@
     </header>
 
     <div class="table">
-      <div class="deck-area">
-        <div class="deck-cards">
-          <div class="deck-card"></div>
-          <div class="deck-card"></div>
-          <div class="deck-card"></div>
+      <!-- Free Deal Mode -->
+      <div id="freeDealUI">
+        <div class="deck-area">
+          <div class="deck-cards">
+            <div class="deck-card"></div>
+            <div class="deck-card"></div>
+            <div class="deck-card"></div>
+          </div>
+          <span class="deck-count"><strong id="deckCount">52</strong> cards</span>
         </div>
-        <span class="deck-count"><strong id="deckCount">52</strong> cards</span>
+
+        <div class="table-controls">
+          <button id="shuffleBtn" class="btn-warning">🔀 Shuffle</button>
+          <button id="resetBtn" class="btn-danger">🔄 Reset</button>
+        </div>
+
+        <div class="players-around-table" id="playersAroundTable"></div>
+        <div class="table-center" id="tableCenter"></div>
+
+        <div class="controls">
+          <button id="dealToAllBtn" class="btn-success">🎯 Deal to All</button>
+          <button id="dealToCenterBtn" class="btn-secondary">📤 Deal to Table</button>
+          <button id="clearCenterBtn" class="btn-danger">🗑️ Clear Table</button>
+        </div>
       </div>
 
-      <div class="table-controls">
-        <button id="shuffleBtn" class="btn-warning">🔀 Shuffle</button>
-        <button id="resetBtn" class="btn-danger">🔄 Reset</button>
-        <button id="debugDeckBtn" class="btn-debug" style="display:none;">🔍 Debug Deck</button>
+      <!-- Blackjack Mode -->
+      <div id="blackjackUI" style="display:none;">
+        <!-- Dealer -->
+        <div style="text-align:center;margin-bottom:20px;">
+          <div style="color:#FFD700;font-size:1rem;margin-bottom:10px;">🎰 DEALER</div>
+          <div class="cards-row" id="dealerCards" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;min-height:80px;"></div>
+          <div id="dealerScore" style="font-size:1.3rem;font-weight:bold;margin-top:8px;"></div>
+        </div>
+
+        <!-- Message -->
+        <div id="bjMessage" style="text-align:center;font-size:1.3rem;font-weight:bold;margin:10px 0;padding:10px;border-radius:8px;display:none;"></div>
+
+        <!-- Player -->
+        <div style="text-align:center;">
+          <div style="color:#00d9ff;font-size:1rem;margin-bottom:10px;">👤 YOU</div>
+          <div class="cards-row" id="playerCards" style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap;min-height:80px;"></div>
+          <div id="playerScore" style="font-size:1.3rem;font-weight:bold;margin-top:8px;"></div>
+          <div id="playerBet" style="color:#f59e0b;margin-top:5px;"></div>
+        </div>
+
+        <!-- Betting -->
+        <div id="bettingSection" style="text-align:center;margin:15px 0;padding:15px;background:rgba(0,0,0,0.3);border-radius:10px;">
+          <input type="number" id="bjBet" value="10" min="1" style="padding:10px;border-radius:6px;border:2px solid #FFD700;width:80px;text-align:center;font-size:1rem;" />
+          <button onclick="placeBet()" style="padding:10px 20px;border-radius:6px;border:none;background:#FFD700;color:#000;font-weight:bold;cursor:pointer;margin-left:8px;">💰 Place Bet</button>
+        </div>
+
+        <!-- Controls -->
+        <div id="bjControls" style="display:none;justify-content:center;gap:10px;margin-top:15px;">
+          <button onclick="hit()" style="padding:12px 25px;border-radius:8px;border:none;background:#22c55e;color:white;font-weight:bold;cursor:pointer;">🖐️ Hit</button>
+          <button onclick="stand()" style="padding:12px 25px;border-radius:8px;border:none;background:#ef4444;color:white;font-weight:bold;cursor:pointer;">✋ Stand</button>
+          <button onclick="double()" id="doubleBtn" style="padding:12px 25px;border-radius:8px;border:none;background:#f59e0b;color:#000;font-weight:bold;cursor:pointer;">✌️ Double</button>
+        </div>
+
+        <!-- Next Round -->
+        <div id="bjNextRound" style="display:none;text-align:center;margin-top:15px;">
+          <button onclick="nextRound()" style="padding:12px 25px;border-radius:8px;border:none;background:#00d9ff;color:#000;font-weight:bold;cursor:pointer;">🎮 Next Round</button>
+        </div>
+
+        <!-- Other Players -->
+        <div id="bjOtherPlayers" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:15px;padding-top:15px;border-top:1px solid rgba(255,255,255,0.2);"></div>
       </div>
-
-      <div class="players-around-table" id="playersAroundTable"></div>
-      <div class="table-center" id="tableCenter"></div>
-    </div>
-
-    <div class="controls">
-      <button id="dealToAllBtn" class="btn-success">🎯 Deal to All</button>
-      <button id="dealToCenterBtn" class="btn-secondary">📤 Deal to Table</button>
-      <button id="clearCenterBtn" class="btn-danger">🗑️ Clear Table</button>
     </div>
 
     <div class="players-section">
@@ -360,6 +404,10 @@
       
       // Update game mode title
       document.getElementById('gameModeTitle').textContent = selectedGameMode === 'freeDeal' ? 'Free Deal Mode' : '🎯 21点 Blackjack';
+      
+      // Toggle UI based on mode
+      document.getElementById('freeDealUI').style.display = selectedGameMode === 'freeDeal' ? 'block' : 'none';
+      document.getElementById('blackjackUI').style.display = selectedGameMode === 'blackjack' ? 'block' : 'none';
       
       // Set player name in game
       document.getElementById('playerName').value = name;
@@ -478,6 +526,11 @@
     socket.on('updateGame', (gameState) => { 
       renderGame(gameState);
       
+      // Render blackjack if in blackjack mode
+      if (gameState.gameMode === 'blackjack') {
+        renderBlackjack(gameState);
+      }
+      
       // Check if current user is in players list - if not, reset join button
       const myPlayer = gameState.players.find(p => p.id === socket.id);
       if (!myPlayer) {
@@ -519,6 +572,117 @@
     function renderCard(card) {
       if (!card) return '<div class="card back"></div>';
       return '<div class="card ' + card.color + '">' + card.value + card.suit + '</div>';
+    }
+
+    // =======================================================================
+    // BLACKJACK FUNCTIONS
+    // =======================================================================
+    function placeBet() {
+      const bet = parseInt(document.getElementById('bjBet').value);
+      if (isNaN(bet) || bet < 1) { alert('Enter valid bet'); return; }
+      socket.emit('placeBet', { bet });
+    }
+    function hit() { socket.emit('hit'); }
+    function stand() { socket.emit('stand'); }
+    function double() { socket.emit('double'); }
+    function nextRound() { socket.emit('nextRound'); }
+
+    function renderBlackjack(state) {
+      const bj = state.blackjack;
+      if (!bj) return;
+
+      const myId = socket.id;
+      const me = state.players.find(p => p.id === myId);
+      
+      // Dealer
+      const dealerHtml = bj.dealerCards.map((c, i) => {
+        if (i === 0 && bj.phase !== 'dealer' && bj.phase !== 'settled') {
+          return '<div class="card back"></div>';
+        }
+        return renderCard(c);
+      });
+      document.getElementById('dealerCards').innerHTML = dealerHtml;
+      
+      const dealerScore = (bj.phase === 'dealer' || bj.phase === 'settled') ? bj.dealerScore : '?';
+      document.getElementById('dealerScore').textContent = dealerScore !== '?' ? `Score: ${dealerScore}` : '';
+
+      // Player
+      if (me && me.cards && me.cards.length > 0) {
+        document.getElementById('playerCards').innerHTML = me.cards.map(c => renderCard(c)).join('');
+        let score = 0, aces = 0;
+        for (const c of me.cards) {
+          if (['J','Q','K'].includes(c.value)) score += 10;
+          else if (c.value === 'A') { score += 11; aces++; }
+          else score += parseInt(c.value);
+        }
+        while (score > 21 && aces > 0) { score -= 10; aces--; }
+        document.getElementById('playerScore').textContent = `Score: ${score}`;
+      } else {
+        document.getElementById('playerCards').innerHTML = '';
+        document.getElementById('playerScore').textContent = '';
+      }
+
+      const bs = bj.players[myId];
+      document.getElementById('playerBet').textContent = bs && bs.bet > 0 ? `Bet: ${bs.bet}` : '';
+
+      // Controls
+      const betSection = document.getElementById('bettingSection');
+      const controls = document.getElementById('bjControls');
+      const nextRoundDiv = document.getElementById('bjNextRound');
+      const msg = document.getElementById('bjMessage');
+
+      msg.style.display = 'none';
+
+      if (bj.phase === 'betting') {
+        betSection.style.display = 'block';
+        controls.style.display = 'none';
+        nextRoundDiv.style.display = 'none';
+        if (bs && bs.bet > 0) {
+          msg.style.display = 'block';
+          msg.style.background = 'rgba(255,255,255,0.1)';
+          msg.textContent = 'Waiting for other players...';
+        }
+      } else if (bj.phase === 'playing') {
+        betSection.style.display = 'none';
+        controls.style.display = 'flex';
+        nextRoundDiv.style.display = 'none';
+        const canDouble = me && me.cards && me.cards.length === 2 && me.balance >= (bs ? bs.bet : 0);
+        document.getElementById('doubleBtn').disabled = !canDouble;
+        if (bj.currentPlayerId === myId) {
+          msg.style.display = 'block';
+          msg.style.background = 'rgba(0,217,255,0.2)';
+          msg.textContent = "🎯 Your turn!";
+        }
+      } else if (bj.phase === 'settled') {
+        betSection.style.display = 'none';
+        controls.style.display = 'none';
+        nextRoundDiv.style.display = 'block';
+        if (bs && bs.result) {
+          msg.style.display = 'block';
+          if (bs.result === 'blackjack') { msg.style.background = 'rgba(255,215,0,0.3)'; msg.textContent = '🎉 BLACKJACK!'; }
+          else if (bs.result === 'win') { msg.style.background = 'rgba(34,197,94,0.3)'; msg.textContent = '🎊 You Win!'; }
+          else if (bs.result === 'lose') { msg.style.background = 'rgba(239,68,68,0.3)'; msg.textContent = '💀 Dealer Wins'; }
+          else if (bs.result === 'push') { msg.style.background = 'rgba(255,255,255,0.2)'; msg.textContent = '⚖️ Push'; }
+          else if (bs.result === 'bust') { msg.style.background = 'rgba(239,68,68,0.3)'; msg.textContent = '💥 BUST!'; }
+        }
+      }
+
+      // Other players
+      let html = '';
+      for (const p of state.players) {
+        if (p.id === myId) continue;
+        const pbs = bj.players[p.id];
+        const isActive = p.id === bj.currentPlayerId;
+        html += `<div style="background:rgba(0,0,0,0.4);padding:8px 12px;border-radius:8px;text-align:center;min-width:80px;${isActive ? 'border:2px solid #00d9ff;' : ''}">`;
+        html += `<div style="font-size:0.8rem;color:#aaa;">${p.name}</div>`;
+        if (p.cards && p.cards.length > 0) {
+          html += '<div style="display:flex;gap:3px;justify-content:center;margin:5px 0;">' + p.cards.map(c => `<div class="card" style="width:30px;height:42px;font-size:0.6rem;">${c.value}${c.suit}</div>`).join('') + '</div>';
+        } else {
+          html += '<div style="color:#666;font-size:0.6rem;margin:5px 0;">Waiting...</div>';
+        }
+        html += '</div>';
+      }
+      document.getElementById('bjOtherPlayers').innerHTML = html;
     }
 
     function renderGame(gameState) {
