@@ -106,6 +106,9 @@ const Blackjack = {
     },
     
     placeBet(socketId, bet) {
+        // Initialize blackjack if not done
+        if (!state.blackjack) Blackjack.init();
+        
         const player = state.players.find(p => p.id === socketId);
         if (!player || !state.blackjack.players[socketId]) return false;
         if (bet < 1 || bet > player.balance) return false;
