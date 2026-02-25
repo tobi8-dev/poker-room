@@ -207,9 +207,15 @@ const Blackjack = {
         if (score > 21) {
             bs.busted = true;
             bs.result = 'bust';
+            this.checkAllPlayersDone();
             this.nextPlayer();
         } else if (score === 21) {
+            // Check if it's a blackjack (2 cards = 21)
+            if (player.cards.length === 2) {
+                bs.result = 'blackjack';
+            }
             bs.standing = true;
+            this.checkAllPlayersDone();
             this.nextPlayer();
         }
         
@@ -255,6 +261,9 @@ const Blackjack = {
     },
     
     nextPlayer() {
+        // Check if all players are done BEFORE moving to next
+        this.checkAllPlayersDone();
+        
         const currentIdx = state.players.findIndex(p => p.id === state.blackjack.currentPlayerId);
         let nextIdx = -1;
         
