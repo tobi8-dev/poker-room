@@ -526,6 +526,11 @@
     socket.on('updateGame', (gameState) => { 
       renderGame(gameState);
       
+      // Toggle UI based on game mode
+      document.getElementById('freeDealUI').style.display = gameState.gameMode === 'freeDeal' ? 'block' : 'none';
+      document.getElementById('blackjackUI').style.display = gameState.gameMode === 'blackjack' ? 'block' : 'none';
+      document.getElementById('gameModeTitle').textContent = gameState.gameMode === 'freeDeal' ? 'Free Deal Mode' : '🎯 21点 Blackjack';
+      
       // Render blackjack if in blackjack mode
       if (gameState.gameMode === 'blackjack') {
         renderBlackjack(gameState);
