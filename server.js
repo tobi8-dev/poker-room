@@ -117,7 +117,7 @@ const Blackjack = {
         
         // Initialize player in blackjack if not exists
         if (!state.blackjack.players[socketId]) {
-            state.blackjack.players[socketId] = { bet: 0, result: null, standing: false, busted: false };
+            state.blackjack.players[socketId] = { bet: 0, result: null, standing: false, busted: false, skipped: false };
         }
         
         if (bet < 1 || bet > player.balance) {
@@ -127,22 +127,45 @@ const Blackjack = {
         
         player.balance -= bet;
         state.blackjack.players[socketId].bet = bet;
+        state.blackjack.players[socketId].skipped = false;
         
-        console.log(`[BET] Player ${socketId} bet ${bet}, remaining balance: ${player.balance}`);
+        console.log(`[BET] Player ${player.name} bet ${bet}, remaining balance: ${player.balance}`);
         
-        // Check if can start (single player can start)
-        this.checkStart();
+        // Check if all players have acted (bet or skip)
+        this.checkBettingPhaseComplete();
+        broadcastState();
         return true;
     },
     
-    checkStart() {
-        // Check if any player has placed a bet - can start with just 1 player
-        const playersWithBets = Object.keys(state.blackjack.players).filter(id => state.blackjack.players[id].bet > 0);
+    skipBet(socketId) {
+        if (!state.blackjack || state.blackjack.phase !== 'betting') return;
         
-        if (playersWithBets.length > 0) {
+        const player = state.players.find(p => p.id === socketId);
+        if (!player) return;
+        
+        // Initialize player as skipped
+        if (!state.blackjack.players[socketId]) {
+            state.blackjack.players[socketId] = { bet: 0, result: null, standing: false, busted: false, skipped: true };
+        } else {
+            state.blackjack.players[socketId].skipped = true;
+        }
+        
+        console.log(`[SKIP] Player ${player.name} skipped this round`);
+        
+        this.checkBettingPhaseComplete();
+        broadcastState();
+    },
+    
+    checkBettingPhaseComplete() {
+        // Check if ALL players have either bet or skipped
+        const allActed = state.players.every(p => {
+            const bs = state.blackjack.players[p.id];
+            return bs && (bs.bet > 0 || bs.skipped);
+        });
+        
+        if (allActed && state.players.length > 0) {
             this.startRound();
         }
-        broadcastState();
     },
     
     startRound() {
@@ -488,6 +511,10 @@ io.on('connection', (socket) => {
     socket.on('placeBet', ({ bet }) => {
         console.log(`[BET] ${socket.id} betting ${bet}`);
         Blackjack.placeBet(socket.id, bet);
+    });
+
+    socket.on('skipBet', () => {
+        Blackjack.skipBet(socket.id);
     });
 
     socket.on('hit', () => Blackjack.hit(socket.id));

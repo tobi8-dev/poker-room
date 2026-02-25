@@ -404,6 +404,7 @@
             <span style="color:#FFD700;margin-right:10px;">💰 Bet:</span>
             <input type="number" id="bjBet" class="bj-bet-input" value="10" min="1" />
             <button onclick="placeBet()" class="bj-btn bj-btn-bet" style="margin-left:10px;">Place Bet</button>
+            <button onclick="skipBet()" class="bj-btn" style="margin-left:10px;background:#6b7280;color:white;">⏭️ Skip Round</button>
           </div>
 
           <!-- Controls -->
@@ -676,6 +677,9 @@
       const bet = parseInt(document.getElementById('bjBet').value);
       if (isNaN(bet) || bet < 1) { alert('Enter valid bet'); return; }
       socket.emit('placeBet', { bet });
+    }
+    function skipBet() {
+      socket.emit('skipBet');
     }
     function hit() { socket.emit('hit'); }
     function stand() { socket.emit('stand'); }
