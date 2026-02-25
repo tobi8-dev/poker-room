@@ -383,7 +383,7 @@
         <div class="bj-table">
           <!-- Dealer -->
           <div class="bj-section">
-            <div class="bj-label dealer">🎰 DEALER</div>
+            <div class="bj-label dealer">🎰 DEALER <span id="dealerTurn" style="color:#FFD700;font-size:0.8rem;"></span></div>
             <div class="bj-cards" id="dealerCards"></div>
             <div class="bj-score" id="dealerScore"></div>
           </div>
@@ -708,7 +708,17 @@
       document.getElementById('dealerCards').innerHTML = dealerHtml;
       
       const dealerScore = (bj.phase === 'dealer' || bj.phase === 'settled') ? bj.dealerScore : '?';
-      document.getElementById('dealerScore').textContent = dealerScore !== '?' ? `Score: ${dealerScore}` : '';
+      let dealerScoreText = dealerScore !== '?' ? `Score: ${dealerScore}` : '';
+      if (bj.dealerHasBlackjack) {
+        dealerScoreText = '🎉 BLACKJACK!';
+      }
+      document.getElementById('dealerScore').textContent = dealerScoreText;
+      
+      // Turn indicator
+      const currentPlayer = state.players.find(p => p.id === bj.currentPlayerId);
+      const currentIdx = state.players.findIndex(p => p.id === bj.currentPlayerId);
+      const turnIndicator = currentPlayer ? `<span style="background:#00d9ff;color:#000;padding:2px 8px;border-radius:10px;font-size:0.7rem;">#${currentIdx + 1} ${currentPlayer.name}'s turn</span>` : '';
+      document.getElementById('dealerTurn').innerHTML = turnIndicator;
 
       // Player
       if (me && me.cards && me.cards.length > 0) {

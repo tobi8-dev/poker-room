@@ -189,6 +189,7 @@ const Blackjack = {
         
         // Check dealer blackjack
         if (this.isBlackjack(state.blackjack.dealerCards)) {
+            state.blackjack.dealerHasBlackjack = true; // Show immediately!
             this.settleRound();
             broadcastState();
             return;
