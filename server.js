@@ -187,13 +187,8 @@ const Blackjack = {
             }
         }
         
-        // Check dealer blackjack
-        if (this.isBlackjack(state.blackjack.dealerCards)) {
-            state.blackjack.dealerHasBlackjack = true; // Show immediately!
-            this.settleRound();
-            broadcastState();
-            return;
-        }
+        // Check dealer blackjack - but DON'T reveal yet! Only check after all players done
+        // Dealer reveals blackjack AFTER all players have finished (standard blackjack rule)
         
         // Check if all players are done (standing or busted)
         this.checkAllPlayersDone();
@@ -308,6 +303,14 @@ const Blackjack = {
     
     dealerPlay() {
         state.blackjack.phase = 'dealer';
+        
+        // Check if dealer has blackjack (reveal now, after all players done)
+        if (this.isBlackjack(state.blackjack.dealerCards)) {
+            state.blackjack.dealerHasBlackjack = true;
+            this.settleRound();
+            broadcastState();
+            return;
+        }
         
         let score = this.calculateScore(state.blackjack.dealerCards);
         while (score < 17) {
