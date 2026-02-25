@@ -755,19 +755,27 @@
         betSection.style.display = 'block';
         controls.style.display = 'none';
         nextRoundDiv.style.display = 'none';
-        // Always show whose turn it is
-        const currentIdx = state.players.findIndex(p => p.id === state.blackjack.currentPlayerId);
-        const currentPlayer = state.players[currentIdx];
-        if (currentPlayer) {
+        
+        // Show who has bet and who's still waiting
+        const playersBet = [];
+        const playersWaiting = [];
+        for (let i = 0; i < state.players.length; i++) {
+          const p = state.players[i];
+          const pbs = bj.players[p.id];
+          if (pbs && (pbs.bet > 0 || pbs.skipped)) {
+            playersBet.push(`#${i+1} ${p.name}`);
+          } else {
+            playersWaiting.push(`#${i+1} ${p.name}`);
+          }
+        }
+        
+        if (playersWaiting.length > 0) {
           msg.style.display = 'block';
           msg.className = 'bj-msg';
           msg.style.background = 'rgba(255,255,255,0.1)';
-          msg.textContent = `🎯 Waiting for #${currentIdx + 1} ${currentPlayer.name}...`;
-        } else if (bs && bs.bet > 0) {
-          msg.style.display = 'block';
-          msg.className = 'bj-msg';
-          msg.style.background = 'rgba(255,255,255,0.1)';
-          msg.textContent = 'Waiting for other players...';
+          msg.textContent = `🎯 Waiting for: ${playersWaiting.join(', ')}`;
+        } else {
+          msg.style.display = 'none';
         }
       } else if (bj.phase === 'playing') {
         betSection.style.display = 'none';
